@@ -1,0 +1,28 @@
+[package]
+name = "code-splitter"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tree-sitter = "0.21.0"
+tree-sitter-c = "0.21.0"
+tree-sitter-go = "0.21.0"
+tree-sitter-javascript = "0.21.0"
+tree-sitter-python = "0.21.0"
+tree-sitter-rust = "0.21.0"
+tree-sitter-typescript = "0.21.0"
+tree-sitter-c-sharp = "0.21.0"
+tree-sitter-java = "0.21.0"
+tree-sitter-cpp = "0.21.0"
+tree-sitter-ruby = "0.21.0"
+tree-sitter-bash = "0.21.0"
+tree-sitter-php = "0.22.4"
+tree-sitter-md = "0.2.3"
+tree-sitter-protobuf = { git = "https://github.com/imotai/tree-sitter-protobuf", rev = "6af31d8" }
+tree-sitter-solidity = { git="https://github.com/imotai/tree-sitter-solidity.git", rev="ef0dfe6"}
+tree-sitter-toml-ng = { git="https://github.com/imotai/tree-sitter-toml.git", rev="da1cac4"}
+tree-sitter-sql = { git="https://github.com/imotai/tree-sitter-sql.git", rev="0d35969"}
+tree-sitter-r = {git="https://github.com/imotai/tree-sitter-r.git", rev="36a9969"}
+anyhow = "1.0.89"
+rstest = "0.23.0"
+tiktoken-rs = "0.5.9"
