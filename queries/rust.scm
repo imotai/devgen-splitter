@@ -1,5 +1,5 @@
 (
-      (line_comment)+ @function.comment
+      (line_comment)* @function.comment
       .
       (function_item
         name: (identifier) @function.name
@@ -7,7 +7,7 @@
 )
 
 (
-  (line_comment)+ @struct.comment
+  (line_comment)* @struct.comment
   .
   (struct_item
     name: (type_identifier) @struct.name
@@ -15,7 +15,7 @@
 )
 
 (
-  (line_comment)+ @trait.comment
+  (line_comment)* @trait.comment
   .
   (trait_item
     name: (type_identifier) @trait.name
@@ -27,7 +27,7 @@
   type: (type_identifier) @impl.class.name
   body: (declaration_list
     (
-      (line_comment)+ @method.comment
+      (line_comment)* @method.comment
       .
       (function_item
         name: (identifier) @method.name
@@ -37,7 +37,7 @@
 )
 
 (
-  (line_comment)+ @enum.comment
+  (line_comment)* @enum.comment
   .
   (enum_item
     name: (type_identifier) @enum.name

@@ -7,22 +7,14 @@
 use super::{
     CodeChunk,
     CodeEntity,
+    EntityNode,
     EntityType,
     SplitOptions,
     Splitter,
 };
-use crate::lang::LangConfig;
 use anyhow::Result;
-use std::{
-    collections::HashMap,
-    ops::Range,
-};
+use std::collections::HashMap;
 use tiktoken_rs::p50k_base;
-use tree_sitter::{
-    Parser,
-    Query,
-    QueryCursor,
-};
 
 /// the capture names for rust function definition
 const FUNCTION_DEFINITION: &str = "function.definition";
@@ -51,74 +43,9 @@ const ENUM_DEFINITION: &str = "enum.definition";
 const ENUM_COMMENT: &str = "enum.comment";
 const ENUM_NAME: &str = "enum.name";
 
-/// A struct to represent a tree-sitter node with byte range and line range
-#[derive(Debug, Clone)]
-struct RustNode {
-    pub byte_range: Range<usize>,
-    pub line_range: Range<usize>,
-}
-
 impl Splitter {
-    /// Split the rust code into code entities
-    ///
-    /// # Arguments
-    /// * `lang_config` - The language configuration
-    /// * `code` - The code to split
-    ///
-    /// # Returns
-    /// A vector of code entities
-    pub(crate) fn split_rust(
-        lang_config: &LangConfig,
-        code: &str,
-        options: &SplitOptions,
-    ) -> Result<Vec<CodeChunk>> {
-        let mut parser = Parser::new();
-        parser.set_language(&(lang_config.grammar)())?;
-        let tree = parser
-            .parse(code, None)
-            .ok_or(anyhow::anyhow!("Failed to parse code"))?;
-        let query = Query::new(&(lang_config.grammar)(), lang_config.query)?;
-        let mut query_cursor = QueryCursor::new();
-        let matches = query_cursor.matches(&query, tree.root_node(), code.as_bytes());
-        let mut result = vec![];
-        for m in matches {
-            let mut captures: HashMap<String, RustNode> = HashMap::new();
-            for c in m.captures {
-                let capture_name = query.capture_names()[c.index as usize];
-                if let Some(existing_node) = captures.get_mut(capture_name) {
-                    existing_node.byte_range = Range {
-                        start: existing_node
-                            .byte_range
-                            .start
-                            .min(c.node.byte_range().start),
-                        end: existing_node.byte_range.end.max(c.node.byte_range().end),
-                    };
-                    existing_node.line_range = Range {
-                        start: existing_node
-                            .line_range
-                            .start
-                            .min(c.node.start_position().row),
-                        end: existing_node.line_range.end.max(c.node.end_position().row),
-                    };
-                } else {
-                    captures.insert(
-                        capture_name.to_string(),
-                        RustNode {
-                            byte_range: c.node.byte_range(),
-                            line_range: c.node.start_position().row..c.node.end_position().row,
-                        },
-                    );
-                }
-            }
-            let entity = Self::convert_rust_node_to_code_entity(captures, code)?;
-            result.push(entity);
-        }
-        let chunks = Self::merge_rust_code_entities(code, result, options)?;
-        Ok(chunks)
-    }
-
     /// Merge the code entities into code chunks by the given options
-    fn merge_rust_code_entities(
+    pub(crate) fn merge_rust_code_entities(
         code: &str,
         entities: Vec<CodeEntity>,
         options: &SplitOptions,
@@ -128,35 +55,34 @@ impl Splitter {
         let mut chunked_line_number = 0;
         let mut chunks = vec![];
         let tokenizer = p50k_base()?;
+
         for entity in entities {
             let start = if let Some(ref comment_range) = entity.comment_line_range {
                 comment_range.start
             } else {
                 entity.body_line_range.start
             };
-            let end = entity.body_line_range.end;
-            let entry_content = lines[start..end].join("\n");
-            let new_token_count = tokenizer.encode_with_special_tokens(&entry_content).len();
             let left_content = lines[chunked_line_number..start].join("\n");
             let left_token_count = tokenizer.encode_with_special_tokens(&left_content).len();
-            if left_token_count + new_token_count > options.chunk_token_size {
+            if left_token_count > options.chunk_token_size {
                 chunks.push(CodeChunk {
                     line_range: chunked_line_number..start,
-                    entities: entity_buffer,
+                    entities: std::mem::take(&mut entity_buffer),
                 });
-                entity_buffer = vec![entity];
-                chunked_line_number = end;
-            } else {
-                entity_buffer.push(entity);
+                chunked_line_number = start;
             }
+            // Add the entity to the buffer
+            entity_buffer.push(entity);
         }
-        // handle the last chunk
-        if !entity_buffer.is_empty() {
+
+        // Handle the last chunk
+        if chunked_line_number < lines.len() {
             chunks.push(CodeChunk {
                 line_range: chunked_line_number..lines.len(),
                 entities: entity_buffer,
             });
         }
+
         Ok(chunks)
     }
 
@@ -179,13 +105,14 @@ impl Splitter {
     /// * Struct: identified by the "struct.definition" key
     /// * Interface (Trait): identified by the "trait.definition" key
     /// * Method: identified by the "method.definition" key
+    /// * Enum: identified by the "enum.definition" key
     ///
     /// # Errors
     ///
     /// Returns an error if the captures don't contain a recognized entity type
     /// or if there's an issue constructing the CodeEntity
-    fn convert_rust_node_to_code_entity(
-        captures: HashMap<String, RustNode>,
+    pub(crate) fn convert_rust_node_to_code_entity(
+        captures: &HashMap<String, EntityNode>,
         code: &str,
     ) -> Result<CodeEntity> {
         let (entity_type, definition_node, comment_key, name_key) = match (
