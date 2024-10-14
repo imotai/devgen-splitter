@@ -18,14 +18,6 @@
 )
 
 (
-  (comment)* @class.comment
-  .
-  (class_declaration
-    name: (_) @class.name
-  ) @class.definition
-)
-
-(
   (comment)* @interface.comment
   .
   (interface_declaration
@@ -52,12 +44,4 @@
       ) @method.definition
     )*
   )
-)
-
-(
-  (comment)* @type.comment
-  .
-  (type_alias_declaration
-    name: (_) @type.name
-  ) @type.definition
 )

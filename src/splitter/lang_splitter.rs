@@ -14,7 +14,6 @@ use super::{
 };
 use anyhow::Result;
 use std::collections::HashMap;
-use tiktoken_rs::p50k_base;
 use tree_sitter::Node;
 
 /// the capture names for rust function definition
@@ -29,10 +28,10 @@ const STRUCT_NAME: &str = "struct.name";
 const STRUCT_DERIVE: &str = "struct.derive";
 
 /// the capture names for rust trait definition
-const TRAIT_DEFINITION: &str = "trait.definition";
-const TRAIT_COMMENT: &str = "trait.comment";
-const TRAIT_NAME: &str = "trait.name";
-const TRAIT_DERIVE: &str = "trait.derive";
+const TRAIT_DEFINITION: &str = "interface.definition";
+const TRAIT_COMMENT: &str = "interface.comment";
+const TRAIT_NAME: &str = "interface.name";
+const TRAIT_DERIVE: &str = "interface.derive";
 
 /// the capture names for rust method definition
 const METHOD_DEFINITION: &str = "method.definition";
@@ -49,84 +48,91 @@ const ENUM_DERIVE: &str = "enum.derive";
 
 impl Splitter {
     /// Merge the code entities into code chunks by the given options
-    pub(crate) fn merge_rust_code_entities<'a>(
+    pub(crate) fn merge_code_entities<'a>(
         code: &str,
         entities: Vec<(CodeEntity, Vec<Node>)>,
         options: &SplitOptions,
     ) -> Result<Vec<CodeChunk>> {
         let lines: Vec<&str> = code.lines().collect();
         let mut chunks = vec![];
-        let tokenizer = p50k_base()?;
         let mut last_chunk_end_line = 0;
         let mut current_chunk = CodeChunk {
             line_range: 0..0,
             entities: vec![],
-            token_count: 0,
+            header: None,
         };
-        for (entity, nodes) in entities {
-            println!(
-                "entity: {:?} last_chunk_end_line: {:?}",
-                entity, last_chunk_end_line
-            );
-            let start = entity
-                .comment_line_range
-                .as_ref()
-                .map_or(entity.body_line_range.start, |range| range.start);
+        for (entity, nodes) in &entities {
+            let start = if let Some(ref comment_line_range) = &entity.comment_line_range {
+                if comment_line_range.start < entity.body_line_range.start {
+                    comment_line_range.start
+                } else {
+                    entity.body_line_range.start
+                }
+            } else {
+                entity.body_line_range.start
+            };
             let end = entity.body_line_range.end;
-            let entity_content = lines[start..end].join("\n");
-            let entity_token_count = tokenizer.encode_with_special_tokens(&entity_content).len();
-            let left_content = lines[last_chunk_end_line..start].join("\n");
-            let left_token_count = tokenizer.encode_with_special_tokens(&left_content).len();
-            if left_token_count > options.chunk_token_size {
+            if last_chunk_end_line == 0 && start > 0 {
                 current_chunk.line_range.start = last_chunk_end_line;
                 current_chunk.line_range.end = start;
-                current_chunk.token_count = left_token_count;
+                if options.enable_header {
+                    current_chunk.header = Some(
+                        "File preamble: imports, module declarations, and file-level comments"
+                            .to_string(),
+                    );
+                }
+                chunks.push(current_chunk);
+                last_chunk_end_line = start;
+                current_chunk = CodeChunk {
+                    line_range: 0..0,
+                    entities: vec![],
+                    header: None,
+                };
+            }
+            let left_lines = start - last_chunk_end_line;
+            if left_lines > options.chunk_line_limit {
+                current_chunk.line_range.start = last_chunk_end_line;
+                current_chunk.line_range.end = start;
                 chunks.push(current_chunk);
                 current_chunk = CodeChunk {
                     line_range: 0..0,
                     entities: vec![],
-                    token_count: 0,
+                    header: None,
                 };
                 last_chunk_end_line = start;
             }
-            if entity_token_count > options.chunk_token_size {
-                if !current_chunk.entities.is_empty() {
-                    current_chunk.line_range.start = last_chunk_end_line;
-                    current_chunk.line_range.end = start;
-                    chunks.push(current_chunk);
-                    last_chunk_end_line = start;
-                    current_chunk = CodeChunk {
-                        line_range: 0..0,
-                        entities: vec![],
-                        token_count: 0,
-                    };
-                }
+            let entity_lines = end - start;
+            if entity_lines > options.chunk_line_limit {
                 let (new_chunks, new_last_chunk_end_line) =
-                    Self::split_entity(&lines, last_chunk_end_line, &entity, &nodes, options)?;
+                    Self::split_entity(last_chunk_end_line, &entity, &nodes, options)?;
                 chunks.extend(new_chunks);
                 last_chunk_end_line = new_last_chunk_end_line;
-            } else if left_token_count + entity_token_count > options.chunk_token_size {
+            } else if entity_lines + left_lines > options.chunk_line_limit {
                 current_chunk.line_range.start = last_chunk_end_line;
-                current_chunk.line_range.end = end;
-                current_chunk.token_count = left_token_count + entity_token_count;
-                current_chunk.entities.push(entity);
+                current_chunk.line_range.end = end + 1;
+                current_chunk.entities.push(entity.clone());
                 chunks.push(current_chunk);
-                last_chunk_end_line = end;
+                last_chunk_end_line = end + 1;
                 current_chunk = CodeChunk {
                     line_range: 0..0,
                     entities: vec![],
-                    token_count: 0,
+                    header: None,
                 };
             } else {
-                current_chunk.entities.push(entity);
+                current_chunk.entities.push(entity.clone());
             }
         }
         if last_chunk_end_line < lines.len() {
+            if let Some(ref last_entity) = entities.last() {
+                if options.enable_header
+                    && last_chunk_end_line < last_entity.0.body_line_range.end
+                    && last_chunk_end_line > last_entity.0.body_line_range.start
+                {
+                    current_chunk.header = Self::build_header(&last_entity.0);
+                }
+            }
             current_chunk.line_range.start = last_chunk_end_line;
             current_chunk.line_range.end = lines.len();
-            let content = lines[last_chunk_end_line..].join("\n");
-            let token_count = tokenizer.encode_with_special_tokens(&content).len();
-            current_chunk.token_count = token_count;
             chunks.push(current_chunk);
         }
         Ok(chunks)
@@ -157,7 +163,7 @@ impl Splitter {
     ///
     /// Returns an error if the captures don't contain a recognized entity type
     /// or if there's an issue constructing the CodeEntity
-    pub(crate) fn convert_rust_node_to_code_entity(
+    pub(crate) fn convert_node_to_code_entity(
         captures: &HashMap<String, EntityNode>,
         code: &str,
     ) -> Result<CodeEntity> {

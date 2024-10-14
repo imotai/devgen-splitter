@@ -4,7 +4,7 @@
 // Distributed under terms of the MIT license.
 //
 pub mod entity_splitter;
-mod rust_splitter;
+mod lang_splitter;
 use crate::lang::{
     Lang,
     LangConfig,
@@ -62,19 +62,23 @@ pub struct CodeEntity {
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct CodeChunk {
     pub line_range: Range<usize>,
+    /// description of the chunk
+    /// it's a short string to describe the chunk content
+    pub header: Option<String>,
+    /// entities in the chunk
     pub entities: Vec<CodeEntity>,
-    pub token_count: usize,
 }
 
 /// Options for splitting code into chunks
 pub struct SplitOptions {
-    /// The maximum number of tokens for each code chunk.
+    /// The maximum number of lines for each code chunk.
     ///
     /// This value determines the size of the "window" used when splitting the code into chunks.
     /// If a chunk exceeds this size, it will be divided into smaller chunks.
     /// A larger value results in fewer, larger chunks, while a smaller value produces more,
     /// smaller chunks.
-    pub chunk_token_size: usize,
+    pub chunk_line_limit: usize,
+    pub enable_header: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -157,6 +161,12 @@ impl Splitter {
                 if capture_name.ends_with(".name") {
                     continue;
                 }
+                if nodes.len() > 0 {
+                    let last_node = nodes.last().expect("Failed to get last node");
+                    if last_node.start_position().row == c.node.start_position().row {
+                        continue;
+                    }
+                }
                 nodes.push(c.node);
             }
             if nodes.len() > 0 {
@@ -168,17 +178,25 @@ impl Splitter {
                 let entities = captures_map
                     .iter()
                     .filter_map(|(_definition_range, (captures, nodes))| {
-                        match Self::convert_rust_node_to_code_entity(captures, code) {
+                        match Self::convert_node_to_code_entity(captures, code) {
                             Ok(entity) => Some((entity, nodes.to_vec())),
                             Err(_e) => None,
                         }
                     })
                     .collect::<Vec<(CodeEntity, Vec<Node>)>>();
-                Self::merge_rust_code_entities(code, entities, options)
+                Self::merge_code_entities(code, entities, options)
             }
             "TypeScript" => {
-                println!("TypeScript is {:?}", captures_map);
-                anyhow::bail!("TypeScript is not supported yet")
+                let entities = captures_map
+                    .iter()
+                    .filter_map(|(_definition_range, (captures, nodes))| {
+                        match Self::convert_node_to_code_entity(captures, code) {
+                            Ok(entity) => Some((entity, nodes.to_vec())),
+                            Err(_e) => None,
+                        }
+                    })
+                    .collect::<Vec<(CodeEntity, Vec<Node>)>>();
+                Self::merge_code_entities(code, entities, options)
             }
             _ => anyhow::bail!("Unsupported language"),
         }

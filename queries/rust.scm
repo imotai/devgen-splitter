@@ -17,13 +17,13 @@
 )
 
 (
-  (line_comment)* @trait.comment
+  (line_comment)* @interface.comment
   .
-  (attribute_item)? @trait.derive
+  (attribute_item)? @interface.derive
   .
   (trait_item
-    name: (type_identifier) @trait.name
-  ) @trait.definition
+    name: (type_identifier) @interface.name
+  ) @interface.definition
 )
 
 (

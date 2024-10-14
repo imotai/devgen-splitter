@@ -6,24 +6,18 @@ use rstest::rstest;
 
 #[rstest]
 #[case(
-    "rust_function_test.rs",
-    include_str!("./cases/rust/rust_function_test.rs"),
+    "ts_function_test.ts",
+    include_str!("./cases/ts/typescript_function_test.ts"),
     SplitOptions { chunk_line_limit: 40, enable_header: true },
-    1
+    2
 )]
 #[case(
-    "rust_function_in_mod.rs",
-    include_str!("./cases/rust/rust_function_in_mod.rs"),
+    "ts_react_test.tsx",
+    include_str!("./cases/ts/typescript_react_test.ts"),
     SplitOptions { chunk_line_limit: 40, enable_header: true },
-    1
+    6
 )]
-#[case(
-    "rust_long_function.rs",
-    include_str!("./cases/rust/rust_long_function.rs"),
-    SplitOptions { chunk_line_limit: 40, enable_header: true },
-    1
-)]
-fn test_rust_split(
+fn test_ts_split(
     #[case] filename: &str,
     #[case] code: &str,
     #[case] options: SplitOptions,
@@ -33,16 +27,14 @@ fn test_rust_split(
     assert_eq!(result.is_ok(), true);
     let result = result.unwrap();
     let lines = code.lines().collect::<Vec<&str>>();
-    for chunk in result {
+    for chunk in &result {
         println!(
             "----------------{:?} {}--------------",
             chunk.line_range,
-            chunk.header.unwrap_or("".to_string())
+            chunk.header.clone().unwrap_or("".to_string())
         );
-        println!(
-            "{}",
-            lines[chunk.line_range.start..chunk.line_range.end].join("\n")
-        );
+        println!("{}", lines[chunk.line_range.clone()].join("\n"));
         println!("-------------------------------");
     }
+    assert_eq!(result.len(), expected);
 }
