@@ -11,7 +11,7 @@ use rstest::rstest;
     SplitOptions { chunk_line_limit: 40, enable_header: true },
     4
 )]
-fn test_ts_split(
+fn test_java_split(
     #[case] filename: &str,
     #[case] code: &str,
     #[case] options: SplitOptions,
