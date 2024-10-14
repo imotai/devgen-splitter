@@ -72,7 +72,7 @@ impl Splitter {
                 entity.body_line_range.start
             };
             let end = entity.body_line_range.end;
-            if last_chunk_end_line == 0 && start > 0 {
+            if last_chunk_end_line == 0 && start - last_chunk_end_line > 10 {
                 current_chunk.line_range.start = last_chunk_end_line;
                 current_chunk.line_range.end = start;
                 if options.enable_header {
