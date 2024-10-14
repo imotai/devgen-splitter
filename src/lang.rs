@@ -70,6 +70,7 @@ mod tests {
 
     #[rstest]
     #[case("example.rs", Some("Rust"))]
+    #[case("example.ts", Some("TypeScript"))]
     #[case("unknown.xyz", None)]
     fn test_from_filename(#[case] filename: &str, #[case] expected_lang: Option<&str>) {
         let result = Lang::from_filename(filename);

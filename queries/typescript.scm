@@ -42,14 +42,15 @@
 )
 
 (class_declaration
+  name: (_) @method.class.name
   body: (class_body
     (
-      (comment)+ @method.comment
+      (comment)* @method.comment
       .
       (method_definition
         name: (_) @method.name
       ) @method.definition
-    )
+    )*
   )
 )
 

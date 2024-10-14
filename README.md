@@ -1,2 +1,2 @@
-# code-splitter
-Contextual Code Splitter for AI-Driven Code Agents
+Contextual code splitter for AI-Driven code agents
+

@@ -9,6 +9,8 @@
 (
   (line_comment)* @struct.comment
   .
+  (attribute_item)? @struct.derive
+  .
   (struct_item
     name: (type_identifier) @struct.name
   ) @struct.definition
@@ -17,14 +19,26 @@
 (
   (line_comment)* @trait.comment
   .
+  (attribute_item)? @trait.derive
+  .
   (trait_item
     name: (type_identifier) @trait.name
   ) @trait.definition
 )
 
+(
+  (line_comment)* @enum.comment
+  .
+  (attribute_item)? @enum.derive
+  .
+  (enum_item
+    name: (type_identifier) @enum.name
+  ) @enum.definition
+)
+
 (impl_item
-  trait: (type_identifier)? @impl.trait.name
-  type: (type_identifier) @impl.class.name
+  trait: (type_identifier)? @method.interface.name
+  type: (type_identifier) @method.class.name
   body: (declaration_list
     (
       (line_comment)* @method.comment
@@ -32,14 +46,6 @@
       (function_item
         name: (identifier) @method.name
       ) @method.definition
-    )
+    )*
   )
-)
-
-(
-  (line_comment)* @enum.comment
-  .
-  (enum_item
-    name: (type_identifier) @enum.name
-  ) @enum.definition
 )

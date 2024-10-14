@@ -5,4 +5,4 @@
 //
 
 pub mod lang;
-pub mod spliter;
+pub mod splitter;
