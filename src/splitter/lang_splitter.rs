@@ -167,6 +167,7 @@ impl Splitter {
         captures: &HashMap<String, EntityNode>,
         code: &str,
     ) -> Result<CodeEntity> {
+        println!("captures: {:?}", captures);
         let (entity_type, definition_node, comment_key, name_key, derive_key) = match (
             captures.get(FUNCTION_DEFINITION),
             captures.get(STRUCT_DEFINITION),
