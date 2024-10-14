@@ -93,6 +93,7 @@ impl Splitter {
             if left_lines > options.chunk_line_limit {
                 current_chunk.line_range.start = last_chunk_end_line;
                 current_chunk.line_range.end = start;
+                current_chunk.header = Self::build_header_for_entities(&current_chunk.entities);
                 chunks.push(current_chunk);
                 current_chunk = CodeChunk {
                     line_range: 0..0,
@@ -111,6 +112,7 @@ impl Splitter {
                 current_chunk.line_range.start = last_chunk_end_line;
                 current_chunk.line_range.end = end + 1;
                 current_chunk.entities.push(entity.clone());
+                current_chunk.header = Self::build_header_for_entities(&current_chunk.entities);
                 chunks.push(current_chunk);
                 last_chunk_end_line = end + 1;
                 current_chunk = CodeChunk {
@@ -167,7 +169,6 @@ impl Splitter {
         captures: &HashMap<String, EntityNode>,
         code: &str,
     ) -> Result<CodeEntity> {
-        println!("captures: {:?}", captures);
         let (entity_type, definition_node, comment_key, name_key, derive_key) = match (
             captures.get(FUNCTION_DEFINITION),
             captures.get(STRUCT_DEFINITION),

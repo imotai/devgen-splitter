@@ -9,7 +9,7 @@ use rstest::rstest;
     "java_function_test.java",
     include_str!("./cases/java/test_java.java"),
     SplitOptions { chunk_line_limit: 40, enable_header: true },
-    3
+    4
 )]
 fn test_ts_split(
     #[case] filename: &str,
@@ -18,7 +18,6 @@ fn test_ts_split(
     #[case] expected: usize,
 ) {
     let result = Splitter::split(filename, code, &options);
-    println!("{:?}", result);
     assert_eq!(result.is_ok(), true);
     let result = result.unwrap();
     let lines = code.lines().collect::<Vec<&str>>();

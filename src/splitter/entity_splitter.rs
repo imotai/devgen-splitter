@@ -10,6 +10,30 @@ use std::ops::Range;
 use tree_sitter::Node;
 
 impl Splitter {
+    pub fn build_header_for_entities(entities: &Vec<CodeEntity>) -> Option<String> {
+        if entities.is_empty() {
+            return None;
+        }
+
+        // Check if all entities are methods and belong to the same class
+        let all_methods = entities.iter().all(|e| e.entity_type == EntityType::Method);
+        let same_class = entities
+            .iter()
+            .all(|e| e.parent_name == entities[0].parent_name);
+
+        if all_methods && same_class {
+            // Get the class name from the first entity's parent_name
+            if let Some(class_name) = &entities[0].parent_name {
+                return Some(format!(
+                    "The following methods belong to class '{}'",
+                    class_name
+                ));
+            }
+        }
+
+        None
+    }
+
     pub fn build_header(entity: &CodeEntity) -> Option<String> {
         match entity.entity_type {
             EntityType::Class => Some(format!(
