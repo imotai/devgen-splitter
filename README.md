@@ -14,7 +14,7 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-devgen-splitter = "0.1.0"
+devgen-splitter = "0.2.0"
 ```
 
 Basic example:
