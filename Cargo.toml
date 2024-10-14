@@ -24,11 +24,7 @@ tree-sitter-ruby = "0.21.0"
 tree-sitter-bash = "0.21.0"
 tree-sitter-php = "0.22.4"
 tree-sitter-md = "0.2.3"
-tree-sitter-protobuf = { git = "https://github.com/imotai/tree-sitter-protobuf", rev = "6af31d8" }
-tree-sitter-solidity = { git="https://github.com/imotai/tree-sitter-solidity.git", rev="ef0dfe6"}
-tree-sitter-toml-ng = { git="https://github.com/imotai/tree-sitter-toml.git", rev="da1cac4"}
-tree-sitter-sql = { git="https://github.com/imotai/tree-sitter-sql.git", rev="0d35969"}
-tree-sitter-r = {git="https://github.com/imotai/tree-sitter-r.git", rev="36a9969"}
 anyhow = "1.0.89"
+
+[dev-dependencies]
 rstest = "0.23.0"
-tiktoken-rs = "0.5.9"

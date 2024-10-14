@@ -9,7 +9,7 @@ use rstest::rstest;
     "ts_function_test.ts",
     include_str!("./cases/ts/typescript_function_test.ts"),
     SplitOptions { chunk_line_limit: 40, enable_header: true },
-    4
+    2
 )]
 #[case(
     "ts_react_test.tsx",
