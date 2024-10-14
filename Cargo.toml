@@ -1,10 +1,10 @@
 [package]
-name = "code-splitter"
+name = "devgen-splitter"
 version = "0.1.0"
 edition = "2021"
 authors = ["imotai <imotai@gmail.com>"]
-description = "Code Splitter is a Rust library designed to intelligently parse and split source code into meaningful chunks."
-repository = "https://github.com/imotai/code-splitter"
+description = "Devgen Splitter is a Rust library designed to intelligently parse and split source code into meaningful chunks."
+repository = "https://github.com/imotai/devgen-splitter"
 readme = "README.md"
 license = "MIT"
 

@@ -1,4 +1,4 @@
-use code_splitter::splitter::{
+use devgen_splitter::splitter::{
     SplitOptions,
     Splitter,
 };

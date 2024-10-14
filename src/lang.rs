@@ -41,7 +41,7 @@ impl Lang {
     /// # Example
     ///
     /// ```no_run
-    /// use code_splitter::lang::Lang;
+    /// use devgen_splitter::lang::Lang;
     /// let filename = "example.rs";
     /// if let Some(lang_config) = Lang::from_filename(filename) {
     ///     println!("Language: {:?}", lang_config.lang);

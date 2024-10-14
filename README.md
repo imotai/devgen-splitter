@@ -1,4 +1,6 @@
-Code Splitter is a Rust library designed to intelligently parse and split source code into meaningful chunks. It uses tree-sitter grammars to understand the structure of various programming languages, allowing it to split code based on logical entities such as classes, functions, methods, and interfaces.
+Devgen Splitter is a Rust library designed to intelligently parse and split source code into meaningful chunks. It uses tree-sitter grammars to understand the structure of various programming languages, allowing it to split code based on logical entities such as classes, functions, methods, and interfaces.
+
+{{ Devgen Splitter is a submodule of Devgen, a Code Research Assistant for GitHub users. }}
 
 Key features:
 - Language-aware code splitting
@@ -9,19 +11,19 @@ Key features:
 
 ## How to Use
 
-To use Code Splitter in your Rust project, add it to your `Cargo.toml`:
+To use Devgen Splitter in your Rust project, add it to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-code-splitter = "0.1.0"
+devgen-splitter = "0.1.0"
 ```
 
 ### Basic Usage
 
-Here's a simple example of how to use Code Splitter to split a code file:
+Here's a simple example of how to use Devgen Splitter to split a code file:
 
 ```rust
-use code_splitter::splitter::{
+use devgen_splitter::splitter::{
     SplitOptions,
     Splitter,
 };
@@ -41,7 +43,7 @@ You can customize the splitting behavior by passing a `SplitOptions` struct to t
 
 ## Language Support
 
-Code Splitter currently supports the following programming languages:
+Devgen Splitter currently supports the following programming languages:
 
 - [x] Rust
 - [x] Typescript
@@ -58,10 +60,10 @@ Code Splitter currently supports the following programming languages:
 
 ## Development Status
 
-Code Splitter is in active development. Current status:
+Devgen Splitter is in active development. Current status:
 
 - Core functionality implemented for supported languages
 - Ongoing improvements and expansion of capabilities
 - Actively seeking community contributions and feedback
 
-We welcome your input to help shape the future of Code Splitter!
+We welcome your input to help shape the future of Devgen Splitter!

@@ -1,4 +1,4 @@
-use code_splitter::splitter::{
+use devgen_splitter::splitter::{
     SplitOptions,
     Splitter,
 };
@@ -9,7 +9,7 @@ use rstest::rstest;
     "ts_function_test.ts",
     include_str!("./cases/ts/typescript_function_test.ts"),
     SplitOptions { chunk_line_limit: 40, enable_header: true },
-    2
+    4
 )]
 #[case(
     "ts_react_test.tsx",
