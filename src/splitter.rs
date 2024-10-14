@@ -117,6 +117,7 @@ impl Splitter {
             let mut definition_start = 0;
             for c in m.captures {
                 let capture_name = query.capture_names()[c.index as usize];
+                println!("capture_name: {:?}", capture_name);
                 if let Some(existing_node) = captures.get_mut(capture_name) {
                     existing_node.byte_range = Range {
                         start: existing_node
@@ -173,6 +174,7 @@ impl Splitter {
                 captures_map.insert(definition_start, (captures, nodes));
             }
         }
+        println!("captures_map: {:?}", captures_map);
         let entities = captures_map
             .iter()
             .filter_map(|(_definition_range, (captures, nodes))| {

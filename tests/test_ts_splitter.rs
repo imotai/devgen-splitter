@@ -17,6 +17,12 @@ use rstest::rstest;
     SplitOptions { chunk_line_limit: 40, enable_header: true },
     6
 )]
+#[case(
+    "ts_function_class.ts",
+    include_str!("./cases/ts/typescript_function_class.ts"),
+    SplitOptions { chunk_line_limit: 40, enable_header: true },
+    2
+)]
 fn test_ts_split(
     #[case] filename: &str,
     #[case] code: &str,
@@ -24,6 +30,7 @@ fn test_ts_split(
     #[case] expected: usize,
 ) {
     let result = Splitter::split(filename, code, &options);
+    println!("result: {:?}", result);
     assert_eq!(result.is_ok(), true);
     let result = result.unwrap();
     let lines = code.lines().collect::<Vec<&str>>();

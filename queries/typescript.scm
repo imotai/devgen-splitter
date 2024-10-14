@@ -36,12 +36,19 @@
 (class_declaration
   name: (_) @method.class.name
   body: (class_body
-    (
-      (comment)* @method.comment
-      .
-      (method_definition
-        name: (_) @method.name
-      ) @method.definition
-    )*
+  [
+      (
+        (comment)* @method.comment
+        (method_definition
+          name: (_) @method.name
+        ) @method.definition
+      )
+      (
+        (method_definition
+          name: (_) @method.name
+        ) @method.definition
+      )
+    ]* 
+     
   )
 )
