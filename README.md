@@ -12,9 +12,8 @@ Devgen Splitter is a Rust tool that breaks down source code into meaningful part
 
 Add to your `Cargo.toml`:
 
-```toml
-[dependencies]
-devgen-splitter = "0.1.0"
+```shell
+cargo add devgen-splitter
 ```
 
 Basic example:
