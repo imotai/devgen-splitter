@@ -1,8 +1,37 @@
-//
-// lib.rs
-// Copyright (C) 2024 imotai <codego.me@gmail.com>
-// Distributed under terms of the MIT license.
-//
+//! # DevGen Code Splitter Library
+//!
+//! This library provides functionality for splitting source code into manageable chunks
+//! and identifying various code entities within those chunks. It's designed to assist
+//! in code analysis, documentation generation, and other tasks that require structured
+//! parsing of source code.
+//!
+//! ## Main Components:
+//!
+//! - `EntityType`: Enum representing different types of code entities (e.g., Struct, Function).
+//! - `Entity`: Struct containing metadata about a specific code entity.
+//! - `Chunk`: Struct representing a section of code containing one or more entities.
+//! - `SplitOptions`: Configuration options for controlling how code is split into chunks.
+//! - `Lang`: Enum representing supported programming languages (imported from `lang` module).
+//! - `split`: Function for splitting code into chunks (imported from `splitter` module).
+//!
+//! ## Usage Example:
+//!
+//! ```rust
+//! use devgen_splitter::{split, SplitOptions, Lang};
+//!
+//! let source_code = "// Your source code here...";
+//! let options = SplitOptions { chunk_line_limit: 100 };
+//! let chunks = split("test.rs", source_code, &options).unwrap();
+//!
+//! for chunk in chunks {
+//!     println!("Chunk line range: {:?}", chunk.line_range);
+//!     for entity in chunk.entities {
+//!         println!("Entity: {} ({:?})", entity.name, entity.entity_type);
+//!     }
+//! }
+//! ```
+
+// ... (rest of the existing code remains unchanged)
 use std::ops::Range;
 /// Represents the different types of entities that can be identified in the code.
 #[derive(Debug, Clone, PartialEq)]
