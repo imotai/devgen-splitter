@@ -17,10 +17,16 @@
 //! ## Usage Example:
 //!
 //! ```rust
-//! use devgen_splitter::{split, SplitOptions, Lang};
+//! use devgen_splitter::{
+//!     split,
+//!     Lang,
+//!     SplitOptions,
+//! };
 //!
 //! let source_code = "// Your source code here...";
-//! let options = SplitOptions { chunk_line_limit: 100 };
+//! let options = SplitOptions {
+//!     chunk_line_limit: 100,
+//! };
 //! let chunks = split("test.rs", source_code, &options).unwrap();
 //!
 //! for chunk in chunks {
@@ -32,9 +38,14 @@
 //! ```
 
 // ... (rest of the existing code remains unchanged)
+use serde::{
+    Deserialize,
+    Serialize,
+};
 use std::ops::Range;
+
 /// Represents the different types of entities that can be identified in the code.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum EntityType {
     /// Represents a struct definition
     Struct,
@@ -52,7 +63,7 @@ pub enum EntityType {
 ///
 /// This struct contains information about a specific code entity, including its name,
 /// type, and line ranges both in the original source code and within the current chunk.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Entity {
     /// name of the entity
     pub name: String,
@@ -71,7 +82,7 @@ pub struct Entity {
 ///
 /// A chunk is a section of the source code that may contain multiple entities
 /// and is defined by a range of line numbers.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Chunk {
     /// The line range of the chunk in the source code
     pub line_range: Range<usize>,

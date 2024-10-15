@@ -25,6 +25,7 @@ tree-sitter-bash = "0.21.0"
 tree-sitter-php = "0.22.4"
 tree-sitter-md = "0.2.3"
 anyhow = "1.0.89"
+serde = {version="1.0.210", features=["derive"]}
 
 [dev-dependencies]
 rstest = "0.23.0"
