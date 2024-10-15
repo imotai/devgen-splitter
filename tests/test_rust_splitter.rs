@@ -15,13 +15,13 @@ use rstest::rstest;
     "rust_function_in_mod.rs",
     include_str!("./cases/rust/rust_function_in_mod.rs"),
     SplitOptions { chunk_line_limit: 40, enable_header: true },
-    1
+    2
 )]
 #[case(
     "rust_long_function.rs",
     include_str!("./cases/rust/rust_long_function.rs"),
     SplitOptions { chunk_line_limit: 40, enable_header: true },
-    1
+    4
 )]
 fn test_rust_split(
     #[case] filename: &str,
@@ -32,6 +32,7 @@ fn test_rust_split(
     let result = Splitter::split(filename, code, &options);
     assert_eq!(result.is_ok(), true);
     let result = result.unwrap();
+    assert_eq!(result.len(), expected);
     let lines = code.lines().collect::<Vec<&str>>();
     for chunk in result {
         println!(

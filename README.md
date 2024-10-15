@@ -1,18 +1,19 @@
-Devgen Splitter is a Rust tool that breaks down source code into meaningful parts. It uses special language rules to understand code structure in different programming languages and creates helpful descriptions to show how different pieces of code relate to each other.
+Devgen Splitter is a Rust library that breaks down source code into contextual chunks. 
+It utilizes tree-sitter to identify code entities (such as classes, functions, and methods) and generate chunks with contextual metadata.
 
 ## Features
 
 - Language-aware code splitting
-- Identification of code entities (classes, functions, methods, etc.)
-- Flexible chunking options
+- Generate chunks with contextual metadata
 - Support for multiple programming languages
-- Contextual header generation based on the relationship between entities
+
 
 ## Usage
 
-Add to your `Cargo.toml`:
 
-```shell
+Add `devgen-splitter` to your project:
+
+```bash
 cargo add devgen-splitter
 ```
 
@@ -32,20 +33,32 @@ for chunk in chunks {
 
 ## Supported Languages
 
-- [x] Rust
-- [x] TypeScript
-- [x] Java
-- [ ] Python
-- [ ] Go
-- [ ] C++
-- [ ] C#
-- [ ] PHP
-- [ ] SQL
-- [ ] Ruby
-- [ ] Bash
-- [ ] MD
+| Language   | Query Rules | Splitter | Test |
+|------------|-------------|----------|------|
+| Rust       | ✅          | ✅       | ✅   |
+| TypeScript | ✅          | ✅       | ✅   |
+| Java       | ✅          | ✅       | ✅   |
+| Python     | 🚧          | 🚧       | 🚧   |
+| Go         | 🚧          | 🚧       | 🚧   |
+| C++        | 🚧          | 🚧       | 🚧   |
+| C          | 🚧          | 🚧       | 🚧   |
+| MD         | 🚧          | 🚧       | 🚧   |
 
 More languages coming soon!
+
+## Language Mapping
+
+The following table shows how different code structures are represented across various programming languages and their corresponding tree-sitter query rule names:
+
+| Type       | Tree-sitter Query | Rust     | Java     | TypeScript | Python   | Go       | C++      |
+|------------|-------------------|----------|----------|------------|----------|----------|----------|
+| Function   | function.definition | function     | N/A   | function/array function   | function     | function  | function |
+| Method   | method.definition | method    | method   | method   | method      | method     | method |
+| Struct     | struct.declaration | struct  | class    | interface  | class    | struct   | struct   |
+| Class      | class.declaration | impl     | class    | class      | class    | N/A      | class    |
+| Interface  | interface.declaration | trait | interface| N/A  | N/A      | N/A| N/A      | N/A      |
+| Enum       | enum.declaration  | enum     | enum     | enum       | N/A      | N/A      | enum     |
+
 
 ## Development Status
 

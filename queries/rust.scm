@@ -1,3 +1,4 @@
+; Function query
 (
       (line_comment)* @function.comment
       .
@@ -6,6 +7,7 @@
       ) @function.definition
 )
 
+; Struct query
 (
   (line_comment)* @struct.comment
   .
@@ -16,6 +18,7 @@
   ) @struct.definition
 )
 
+; Trait query
 (
   (line_comment)* @interface.comment
   .
@@ -26,6 +29,7 @@
   ) @interface.definition
 )
 
+; Enum query
 (
   (line_comment)* @enum.comment
   .
@@ -36,6 +40,7 @@
   ) @enum.definition
 )
 
+; Impl query
 (impl_item
   trait: (type_identifier)? @method.interface.name
   type: (type_identifier) @method.class.name
@@ -47,5 +52,5 @@
         name: (identifier) @method.name
       ) @method.definition
     )*
-  )
+  )@class.definition
 )

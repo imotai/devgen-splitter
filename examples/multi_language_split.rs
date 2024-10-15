@@ -1,4 +1,7 @@
-use devgen_splitter::splitter::{SplitOptions, Splitter};
+use devgen_splitter::splitter::{
+    SplitOptions,
+    Splitter,
+};
 
 fn main() {
     // Rust example
@@ -45,6 +48,4 @@ console.log(greeter.greet());
             rust_code_lines[chunk.line_range.clone()].join("\n")
         );
     }
-
-    
 }

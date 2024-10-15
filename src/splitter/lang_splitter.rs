@@ -50,7 +50,7 @@ impl Splitter {
     /// Merge the code entities into code chunks by the given options
     pub(crate) fn merge_code_entities<'a>(
         code: &str,
-        entities: Vec<(CodeEntity, Vec<Node>)>,
+        entities: &Vec<(CodeEntity, Vec<Node>)>,
         options: &SplitOptions,
     ) -> Result<Vec<CodeChunk>> {
         let lines: Vec<&str> = code.lines().collect();
@@ -61,7 +61,7 @@ impl Splitter {
             entities: vec![],
             header: None,
         };
-        for (entity, nodes) in &entities {
+        for (i, (entity, nodes)) in entities.iter().enumerate() {
             let start = if let Some(ref comment_line_range) = &entity.comment_line_range {
                 if comment_line_range.start < entity.body_line_range.start {
                     comment_line_range.start
@@ -93,7 +93,6 @@ impl Splitter {
             if left_lines > options.chunk_line_limit {
                 current_chunk.line_range.start = last_chunk_end_line;
                 current_chunk.line_range.end = start;
-                current_chunk.header = Self::build_header_for_entities(&current_chunk.entities);
                 chunks.push(current_chunk);
                 current_chunk = CodeChunk {
                     line_range: 0..0,
