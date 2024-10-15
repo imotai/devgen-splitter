@@ -154,10 +154,15 @@ fn query_captures<'a>(
 /// # Example
 ///
 /// ```
-/// use devgen_splitter::{split, SplitOptions};
+/// use devgen_splitter::{
+///     split,
+///     SplitOptions,
+/// };
 ///
 /// let code = "fn main() { println!(\"Hello, world!\"); }";
-/// let options = SplitOptions { chunk_line_limit: 5 };
+/// let options = SplitOptions {
+///     chunk_line_limit: 5,
+/// };
 /// let chunks = split("example.rs", code, &options).unwrap();
 /// ```
 pub fn split(filename: &str, code: &str, options: &SplitOptions) -> Result<Vec<Chunk>> {
@@ -273,7 +278,6 @@ impl Test {
             println!("chunk: {:?}", chunk);
         }
     }
-
 
     fn run_test_case(
         filename: &str,
