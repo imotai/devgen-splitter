@@ -19,19 +19,18 @@ Add `devgen-splitter` to your project:
 cargo add devgen-splitter
 ```
 
-Basic example:
+Basic usage example:
 
 ```rust
-use devgen_splitter::splitter::{SplitOptions, Splitter};
-
+use devgen_splitter::{SplitOptions, split};
 let code = "fn main() { println!(\"Hello, world!\"); }";
-let options = SplitOptions { chunk_line_limit: 10, enable_header: true };
-let chunks = Splitter::split("example.rs", code, &options).unwrap();
-
+let options = SplitOptions { chunk_line_limit: 10};
+let chunks = split("example.rs", code, &options).unwrap();
 for chunk in chunks {
-    println!("Chunk: {:?}", chunkt);
+    println!("Chunk: {:?}", chunk);
 }
 ```
+For more examples, go to [examples](./examples)
 
 ## Supported Languages
 
