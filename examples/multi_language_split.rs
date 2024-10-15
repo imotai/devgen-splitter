@@ -1,4 +1,7 @@
-use devgen_splitter::splitter::{SplitOptions, Splitter};
+use devgen_splitter::{
+    split,
+    SplitOptions,
+};
 
 fn main() {
     // Rust example
@@ -32,11 +35,9 @@ console.log(greeter.greet());
 
     let options = SplitOptions {
         chunk_line_limit: 5,
-        enable_header: true,
     };
-
     println!("Splitting Rust code:");
-    let rust_chunks = Splitter::split("example.rs", rust_code, &options).unwrap();
+    let rust_chunks = split("example.rs", rust_code, &options).unwrap();
     let rust_code_lines = rust_code.lines().collect::<Vec<&str>>();
     for chunk in rust_chunks {
         println!("chunk lines: {:?}", chunk.line_range);
@@ -44,7 +45,23 @@ console.log(greeter.greet());
             "chunk content: {}",
             rust_code_lines[chunk.line_range.clone()].join("\n")
         );
+        println!("----------context----------");
+        for entity in chunk.entities {
+            println!("entity: {:?}", entity);
+        }
     }
-
-    
+    println!("Splitting Ts code:");
+    let ts_chunks = split("example.ts", ts_code, &options).unwrap();
+    let ts_code_lines = ts_code.lines().collect::<Vec<&str>>();
+    for chunk in ts_chunks {
+        println!("chunk lines: {:?}", chunk.line_range);
+        println!(
+            "chunk content: {}",
+            ts_code_lines[chunk.line_range.clone()].join("\n")
+        );
+        println!("----------context----------");
+        for entity in chunk.entities {
+            println!("entity: {:?}", entity);
+        }
+    }
 }

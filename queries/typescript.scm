@@ -7,22 +7,22 @@
 )
 
 (
-  (comment)* @arrow_function.comment
+  (comment)* @function.comment
   .
   (lexical_declaration
     (variable_declarator
-      name: (identifier) @arrow_function.name
-      value: (arrow_function) @arrow_function.definition
+      name: (identifier) @function.name
+      value: (arrow_function) @function.body
     )
-  )
+  ) @function.definition
 )
 
 (
-  (comment)* @interface.comment
+  (comment)* @struct.comment
   .
   (interface_declaration
-    name: (_) @interface.name
-  ) @interface.definition
+    name: (_) @struct.name
+  ) @struct.definition
 )
 
 (
@@ -50,5 +50,5 @@
       )
     ]* 
      
-  )
+  )@class.definition
 )

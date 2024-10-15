@@ -19,7 +19,7 @@
       ] @method.definition
     )*
   )
-) 
+) @class.definition
 
 (interface_declaration
   name: (identifier) @method.class.name

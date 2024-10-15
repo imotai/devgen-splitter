@@ -1,6 +1,6 @@
-use devgen_splitter::splitter::{
+use devgen_splitter::{
+    split,
     SplitOptions,
-    Splitter,
 };
 use rstest::rstest;
 
@@ -8,19 +8,19 @@ use rstest::rstest;
 #[case(
     "ts_function_test.ts",
     include_str!("./cases/ts/typescript_function_test.ts"),
-    SplitOptions { chunk_line_limit: 40, enable_header: true },
+    SplitOptions { chunk_line_limit: 40},
     2
 )]
 #[case(
     "ts_react_test.tsx",
     include_str!("./cases/ts/typescript_react_test.ts"),
-    SplitOptions { chunk_line_limit: 40, enable_header: true },
+    SplitOptions { chunk_line_limit: 40},
     6
 )]
 #[case(
     "ts_function_class.ts",
     include_str!("./cases/ts/typescript_function_class.ts"),
-    SplitOptions { chunk_line_limit: 40, enable_header: true },
+    SplitOptions { chunk_line_limit: 40},
     2
 )]
 fn test_ts_split(
@@ -29,17 +29,13 @@ fn test_ts_split(
     #[case] options: SplitOptions,
     #[case] expected: usize,
 ) {
-    let result = Splitter::split(filename, code, &options);
+    let result = split(filename, code, &options);
     println!("result: {:?}", result);
     assert_eq!(result.is_ok(), true);
     let result = result.unwrap();
     let lines = code.lines().collect::<Vec<&str>>();
     for chunk in &result {
-        println!(
-            "----------------{:?} {}--------------",
-            chunk.line_range,
-            chunk.header.clone().unwrap_or("".to_string())
-        );
+        println!("----------------{:?} --------------", chunk.line_range,);
         println!("{}", lines[chunk.line_range.clone()].join("\n"));
         println!("-------------------------------");
     }
