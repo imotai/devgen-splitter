@@ -2,6 +2,9 @@ Devgen Splitter is a Rust library that breaks down source code into contextual c
 It utilizes tree-sitter to identify code entities (such as classes, functions, and methods) and generate chunks with contextual metadata.
 
 [![Crates.io Version](https://img.shields.io/crates/v/devgen-splitter)](https://crates.io/crates/devgen-splitter)
+[![codecov](https://codecov.io/github/imotai/devgen-splitter/graph/badge.svg?token=3YSFEZ4JLI)](https://codecov.io/github/imotai/devgen-splitter)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/imotai/devgen-splitter/rust.yml)
+
 
 ## Features
 
