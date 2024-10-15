@@ -67,4 +67,5 @@ pub struct SplitOptions {
 
 mod lang;
 mod splitter;
+pub use lang::Lang;
 pub use splitter::split;

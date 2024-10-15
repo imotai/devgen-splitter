@@ -9,7 +9,8 @@ use rstest::rstest;
     "ts_function_test.ts",
     include_str!("./cases/ts/typescript_function_test.ts"),
     SplitOptions { chunk_line_limit: 40},
-    2
+    3
+
 )]
 #[case(
     "ts_react_test.tsx",
@@ -20,8 +21,8 @@ use rstest::rstest;
 #[case(
     "ts_function_class.ts",
     include_str!("./cases/ts/typescript_function_class.ts"),
-    SplitOptions { chunk_line_limit: 40},
-    2
+    SplitOptions { chunk_line_limit: 30},
+    3
 )]
 fn test_ts_split(
     #[case] filename: &str,

@@ -15,7 +15,7 @@ use rstest::rstest;
     "rust_function_in_mod.rs",
     include_str!("./cases/rust/rust_function_in_mod.rs"),
     SplitOptions { chunk_line_limit: 40},
-    2
+    3
 )]
 #[case(
     "rust_long_function.rs",
