@@ -1,5 +1,5 @@
 //
-// rust_spliter.rs
+// context_spliter.rs
 // Copyright (C) 2024 imotai <codego.me@gmail.com>
 // Distributed under terms of the MIT license.
 //
@@ -38,6 +38,7 @@ const METHOD_COMMENT: &str = "method.comment";
 const METHOD_NAME: &str = "method.name";
 const IMPL_TRAIT_NAME: &str = "method.interface.name";
 const IMPL_CLASS_NAME: &str = "method.class.name";
+const CLASS_DEFINITION: &str = "class.definition";
 
 /// the capture names for rust enum definition
 const ENUM_DEFINITION: &str = "enum.definition";
@@ -193,41 +194,58 @@ pub(crate) fn convert_node_to_code_entity(
     let comment_line_range = captures
         .get(comment_key)
         .map(|node| node.line_range.clone());
-    let comment_line_range = if let Some(derive_key) = derive_key {
+    let comment_byte_range = captures
+        .get(comment_key)
+        .map(|node| node.byte_range.clone());
+    let (comment_line_range, comment_byte_range) = if let Some(derive_key) = derive_key {
         if let Some(derive_node) = captures.get(derive_key) {
-            if let Some(comment_line_range) = comment_line_range.clone() {
+            if let (Some(comment_byte_range), Some(comment_line_range)) =
+                (comment_byte_range.clone(), comment_line_range.clone())
+            {
                 let derive_line_range = derive_node.line_range.clone();
-                let start = if derive_line_range.start < comment_line_range.start {
+                let derive_byte_range = derive_node.byte_range.clone();
+                let line_start = if derive_line_range.start < comment_line_range.start {
                     derive_line_range.start
                 } else {
                     comment_line_range.start
                 };
-                let end = if derive_line_range.end > comment_line_range.end {
+                let line_end = if derive_line_range.end > comment_line_range.end {
                     derive_line_range.end
                 } else if derive_line_range.start == comment_line_range.end {
                     comment_line_range.end + 1
                 } else {
                     comment_line_range.end
                 };
-                Some(start..end)
+                let byte_start = if derive_byte_range.start < comment_byte_range.start {
+                    comment_byte_range.start
+                } else {
+                    derive_byte_range.start
+                };
+                let byte_end = if derive_byte_range.end > comment_byte_range.end {
+                    comment_byte_range.end
+                } else {
+                    derive_byte_range.end
+                };
+                (Some(line_start..line_end), Some(byte_start..byte_end))
             } else {
-                comment_line_range
+                (comment_line_range, comment_byte_range)
             }
         } else {
-            comment_line_range
+            (comment_line_range, comment_byte_range)
         }
     } else {
-        comment_line_range
+        (comment_line_range, comment_byte_range)
     };
 
     let body_line_range = definition_node.line_range.clone();
+    let body_byte_range = definition_node.byte_range.clone();
 
     let name = captures
         .get(name_key)
         .map(|node| code[node.byte_range.clone()].to_string())
         .ok_or_else(|| anyhow::anyhow!("Entity name not found"))?;
 
-    let (parent_name, interface_names) = if entity_type == EntityType::Method {
+    let (parent_name, interface_names, parent_line_range) = if entity_type == EntityType::Method {
         let parent_name = captures
             .get(IMPL_CLASS_NAME)
             .map(|node| code[node.byte_range.clone()].to_string());
@@ -235,9 +253,12 @@ pub(crate) fn convert_node_to_code_entity(
             .get(IMPL_TRAIT_NAME)
             .map(|node| vec![code[node.byte_range.clone()].to_string()])
             .unwrap_or_default();
-        (parent_name, interface_names)
+        let parent_line_range = captures
+            .get(CLASS_DEFINITION)
+            .map(|node| node.line_range.clone());
+        (parent_name, interface_names, parent_line_range)
     } else {
-        (None, vec![])
+        (None, vec![], None)
     };
     let code_entity = CodeEntity {
         name,
@@ -246,6 +267,9 @@ pub(crate) fn convert_node_to_code_entity(
         entity_type,
         parent_name,
         interface_names,
+        body_byte_range,
+        parent_line_range,
+        comment_byte_range,
     };
     Ok(code_entity)
 }

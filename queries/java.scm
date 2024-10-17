@@ -36,7 +36,7 @@
         name: (identifier) @method.name
       ) @method.definition
     )*
-  )
+  ) @class.definition
 ) 
 
 

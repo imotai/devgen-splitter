@@ -3,8 +3,9 @@
 // Copyright (C) 2024 imotai <codego.me@gmail.com>
 // Distributed under terms of the MIT license.
 //
+mod context_splitter;
 pub mod entity_splitter;
-mod lang_splitter;
+mod line_spliter;
 use crate::{
     lang::{
         Lang,
@@ -34,6 +35,7 @@ use tree_sitter::{
 const METHOD_NAME: &str = "method.name";
 const METHOD_DEFINITION: &str = "method.definition";
 const METHOD_COMMENT: &str = "method.comment";
+const CLASS_DEFINITION: &str = "class.definition";
 
 /// Represents a code entity with associated metadata
 #[derive(Debug, Clone, PartialEq)]
@@ -50,6 +52,12 @@ pub struct CodeEntity {
     pub body_line_range: Range<usize>,
     /// Type of the entity (e.g., Class, Function, Interface, Method)
     pub entity_type: EntityType,
+    /// byte range of the comment
+    pub comment_byte_range: Option<Range<usize>>,
+    /// byte range of the body
+    pub body_byte_range: Range<usize>,
+    /// line range of the parent
+    pub parent_line_range: Option<Range<usize>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Default)]
@@ -62,11 +70,13 @@ pub struct CodeChunk {
 
 #[derive(Debug, Clone)]
 pub struct EntityNode {
+    /// the byte range of the node
     pub byte_range: Range<usize>,
+    /// the line range of the node. the end is included
     pub line_range: Range<usize>,
 }
 
-fn query_captures<'a>(
+fn parse_capture_for_entity<'a>(
     lang_config: &LangConfig,
     code: &'a str,
     tree: &'a Tree,
@@ -74,14 +84,29 @@ fn query_captures<'a>(
     let query = Query::new(&(lang_config.grammar)(), lang_config.query)?;
     let mut query_cursor = QueryCursor::new();
     let matches = query_cursor.matches(&query, tree.root_node(), code.as_bytes());
-    let mut captures_map: BTreeMap<usize, (HashMap<String, EntityNode>, Vec<Node>)> =
+    // only the method, function, struct, enum will be pushed to entity_captures_map
+    let mut entity_captures_map: BTreeMap<usize, (HashMap<String, EntityNode>, Vec<Node>)> =
         BTreeMap::new();
+
     for m in matches {
         let mut captures: HashMap<String, EntityNode> = HashMap::new();
+        let mut parent_capture: Option<(String, EntityNode)> = None;
         let mut nodes = vec![];
         let mut definition_start = 0;
         for c in m.captures {
             let capture_name = query.capture_names()[c.index as usize];
+            if capture_name == CLASS_DEFINITION {
+                // enter a new class or interface
+                parent_capture = Some((
+                    capture_name.to_string(),
+                    EntityNode {
+                        byte_range: c.node.byte_range(),
+                        line_range: c.node.start_position().row..c.node.end_position().row,
+                    },
+                ));
+                continue;
+            }
+            // handle the multi times for the same capture name
             if let Some(existing_node) = captures.get_mut(capture_name) {
                 existing_node.byte_range = Range {
                     start: existing_node
@@ -113,7 +138,10 @@ fn query_captures<'a>(
 
             // when meet method.name, we need to push code chunk for every method.name
             if capture_name == METHOD_NAME {
-                captures_map.insert(definition_start, (captures.clone(), nodes));
+                if let Some(ref parent_capture) = parent_capture {
+                    captures.insert(parent_capture.0.clone(), parent_capture.1.clone());
+                }
+                entity_captures_map.insert(definition_start, (captures.clone(), nodes));
                 let new_captures = captures.clone();
                 captures = HashMap::new();
                 captures.extend(new_captures);
@@ -123,17 +151,15 @@ fn query_captures<'a>(
                 nodes = vec![];
                 continue;
             }
-
-            if capture_name.ends_with(".name") || capture_name == "class.definition" {
-                continue;
+            if !capture_name.ends_with(".name") {
+                nodes.push(c.node);
             }
-            nodes.push(c.node);
         }
         if nodes.len() > 0 {
-            captures_map.insert(definition_start, (captures, nodes));
+            entity_captures_map.insert(definition_start, (captures, nodes));
         }
     }
-    Ok(captures_map
+    Ok(entity_captures_map
         .iter()
         .map(|(_start, (captures, nodes))| (captures.clone(), nodes.clone()))
         .collect::<Vec<(HashMap<String, EntityNode>, Vec<Node>)>>())
@@ -166,24 +192,34 @@ fn query_captures<'a>(
 /// let chunks = split("example.rs", code, &options).unwrap();
 /// ```
 pub fn split(filename: &str, code: &str, options: &SplitOptions) -> Result<Vec<Chunk>> {
-    let lang_config =
-        Lang::from_filename(filename).ok_or(anyhow::anyhow!("Unsupported language"))?;
+    let Some(lang_config) = Lang::from_filename(filename) else {
+        return Err(anyhow::anyhow!("Unsupported language"));
+    };
+    let lines = code.lines().collect::<Vec<&str>>();
     let mut parser = Parser::new();
     parser.set_language(&(lang_config.grammar)())?;
     let tree = parser
         .parse(code, None)
         .ok_or(anyhow::anyhow!("Failed to parse code"))?;
-    let captures = query_captures(&lang_config, code, &tree)?;
+    if lang_config.query.is_empty() {
+        return line_spliter::split_tree_node(
+            &lines,
+            &tree.root_node(),
+            options.chunk_line_limit,
+            options.chunk_line_limit / 2,
+        );
+    }
+    let captures = parse_capture_for_entity(&lang_config, code, &tree)?;
     let entities = captures
         .iter()
         .filter_map(|(captures, nodes)| {
-            match lang_splitter::convert_node_to_code_entity(captures, code) {
+            match context_splitter::convert_node_to_code_entity(captures, code) {
                 Ok(entity) => Some((entity, nodes.to_vec())),
                 Err(_e) => None,
             }
         })
         .collect::<Vec<(CodeEntity, Vec<Node>)>>();
-    let chunks = lang_splitter::merge_code_entities(code, &entities, options)?;
+    let chunks = context_splitter::merge_code_entities(code, &entities, options)?;
     Ok(chunks
         .iter()
         .map(|code_chunk| {
@@ -204,6 +240,7 @@ pub fn split(filename: &str, code: &str, options: &SplitOptions) -> Result<Vec<C
                         parent: entity.parent_name.clone(),
                         completed_line_range: entity.body_line_range.clone(),
                         chunk_line_range,
+                        parent_line_range: entity.parent_line_range.clone(),
                     }
                 })
                 .collect::<Vec<Entity>>();
@@ -292,7 +329,7 @@ impl Test {
             .parse(code, None)
             .ok_or(anyhow::anyhow!("Failed to parse code"))
             .unwrap();
-        let captures = query_captures(&lang_config, code, &tree).unwrap();
+        let captures = parse_capture_for_entity(&lang_config, code, &tree).unwrap();
         println!("captures: {:?}", captures);
         for (i, (index, capture_name)) in capture_names.iter().enumerate() {
             let capture = captures[*index].0.get(*capture_name).unwrap();
@@ -372,8 +409,8 @@ trait Test2 {
     fn b(&self);
 }
 "#,
-        vec![(0, "interface.definition"), (1, "interface.definition")],
-        vec![1..3, 5..7],
+        vec![(0, "class.definition"),(0, "method.definition"), (1, "class.definition"), (1, "method.definition")],
+        vec![1..3, 2..2, 5..7, 6..6],
     )]
     fn test_rust_query_captures(
         #[case] code: &str,
