@@ -69,6 +69,10 @@ pub(crate) fn merge_code_entities<'a>(
         } else {
             entity.body_line_range.start
         };
+        // skip the entity that is already in the last chunk
+        if start < last_chunk_end_line {
+            continue;
+        }
         let end = entity.body_line_range.end;
         if i == 0 && start - last_chunk_end_line > 10 {
             current_chunk.line_range.start = last_chunk_end_line;

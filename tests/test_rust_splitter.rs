@@ -23,6 +23,12 @@ use rstest::rstest;
     SplitOptions { chunk_line_limit: 40 },
     4
 )]
+#[case(
+    "rust_tonic_case.rs",
+    include_str!("./cases/rust/rust_tonic_case.rs"),
+    SplitOptions { chunk_line_limit: 40 },
+    10
+)]
 fn test_rust_split(
     #[case] filename: &str,
     #[case] code: &str,
