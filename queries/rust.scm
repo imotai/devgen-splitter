@@ -25,8 +25,17 @@
   (attribute_item)? @interface.derive
   .
   (trait_item
-    name: (type_identifier) @interface.name
-  ) @interface.definition
+    name: (type_identifier) @method.class.name
+    body: (declaration_list
+          (
+            (line_comment)* @method.comment
+            .
+            (function_signature_item
+              name: (identifier) @method.name
+            ) @method.definition
+          )*
+        )
+  ) @class.definition
 )
 
 ; Enum query

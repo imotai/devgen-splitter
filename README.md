@@ -13,6 +13,10 @@ It utilizes tree-sitter to identify code entities (such as classes, functions, a
 - Support for multiple programming languages
 
 
+why devgen-splitter?
+
+for a better cite feature
+
 ## Usage
 
 

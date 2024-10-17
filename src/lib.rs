@@ -76,6 +76,7 @@ pub struct Entity {
     pub chunk_line_range: Range<usize>,
     /// if the entity is a method, the name of the parent struct or interface
     pub parent: Option<String>,
+    pub parent_line_range: Option<Range<usize>>,
 }
 
 /// Represents a chunk of code containing one or more entities.
@@ -93,15 +94,10 @@ pub struct Chunk {
 /// Configuration options for the devgen splitter.
 ///
 /// This struct defines the parameters used to control how the source code
-/// is split into chunks, specifying the minimum and maximum number of lines
-/// for each chunk.
+/// is split into chunks, specifying the maximum number of characters for each chunk.
+#[derive(Debug, Clone, Default)]
 pub struct SplitOptions {
-    /// The maximum number of lines for each code chunk.
-    ///
-    /// This value determines the size of the "window" used when splitting the code into chunks.
-    /// If a chunk exceeds this size, it will be divided into smaller chunks.
-    /// A larger value results in fewer, larger chunks, while a smaller value produces more,
-    /// smaller chunks.
+    /// the maximum number of lines for each chunk
     pub chunk_line_limit: usize,
 }
 
