@@ -76,6 +76,7 @@ pub struct Entity {
     pub chunk_line_range: Range<usize>,
     /// if the entity is a method, the name of the parent struct or interface
     pub parent: Option<String>,
+    /// the line range of the parent in the source code
     pub parent_line_range: Option<Range<usize>>,
 }
 
