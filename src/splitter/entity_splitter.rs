@@ -34,6 +34,9 @@ fn chunk_entity(
         let child = node.child(i).expect("Failed to get child node");
         let child_end_line = child.end_position().row;
         let child_start_line = child.start_position().row;
+        if child_start_line < local_last_chunk_end_line {
+            continue;
+        }
         let left_chunk_line_count = child_start_line - local_last_chunk_end_line;
         if left_chunk_line_count > options.chunk_line_limit {
             let chunk = CodeChunk {
