@@ -283,6 +283,7 @@ fn run_test_case(
         .ok_or(anyhow::anyhow!("Failed to parse code"))
         .unwrap();
     let captures = parse_capture_for_entity(&lang_config, code, &tree).unwrap();
+    println!("captures: {:?}", captures);
     for (i, (index, capture_name)) in capture_names.iter().enumerate() {
         let capture = captures[*index].0.get(*capture_name).unwrap();
         let line_range = line_ranges[i].clone();
