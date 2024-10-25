@@ -46,11 +46,11 @@ For more examples, go to [examples](./examples)
 | Rust       | ✅          | ✅       | ✅   |
 | TypeScript | ✅          | ✅       | ✅   |
 | Java       | ✅          | ✅       | ✅   |
+| Python     | ✅          | ✅       | ✅   |
 | Python     | 🚧          | 🚧       | 🚧   |
 | Go         | 🚧          | 🚧       | 🚧   |
 | C++        | 🚧          | 🚧       | 🚧   |
 | C          | 🚧          | 🚧       | 🚧   |
-| MD         | 🚧          | 🚧       | 🚧   |
 
 More languages coming soon!
 

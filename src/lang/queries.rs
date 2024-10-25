@@ -9,6 +9,7 @@ use super::LangConfig;
 const RUST_QUERY: &'static str = include_str!("../../queries/rust.scm");
 const TYPESCRIPT_QUERY: &'static str = include_str!("../../queries/typescript.scm");
 const JAVA_QUERY: &'static str = include_str!("../../queries/java.scm");
+const PYTHON_QUERY: &'static str = include_str!("../../queries/python.scm");
 // empty query means this language doesn't support context splitting
 const EMPTY_QUERY: &'static str = "";
 
@@ -44,7 +45,7 @@ static PYTHON_LANG_CONFIG: LangConfig = LangConfig {
     lang: &["Python"],
     grammar: tree_sitter_python::language,
     file_extensions: &["py"],
-    query: EMPTY_QUERY,
+    query: PYTHON_QUERY,
 };
 
 static C_LANG_CONFIG: LangConfig = LangConfig {

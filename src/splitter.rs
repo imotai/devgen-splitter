@@ -3,9 +3,21 @@
 // Copyright (C) 2024 imotai <codego.me@gmail.com>
 // Distributed under terms of the MIT license.
 //
+
 mod context_splitter;
 pub mod entity_splitter;
 mod line_spliter;
+
+#[cfg(test)]
+#[path = "./splitter/test_java.rs"]
+mod test_java;
+#[cfg(test)]
+#[path = "./splitter/test_python.rs"]
+mod test_python;
+#[cfg(test)]
+#[path = "./splitter/test_ts.rs"]
+mod test_ts;
+
 use crate::{
     lang::{
         Lang,
@@ -254,6 +266,32 @@ pub fn split(filename: &str, code: &str, options: &SplitOptions) -> Result<Vec<C
 }
 
 #[cfg(test)]
+fn run_test_case(
+    filename: &str,
+    code: &str,
+    capture_names: Vec<(usize, &str)>,
+    line_ranges: Vec<Range<usize>>,
+) {
+    let lang_config = Lang::from_filename(filename).unwrap();
+    let mut parser = Parser::new();
+    parser.set_language(&(lang_config.grammar)()).unwrap();
+    let tree = parser
+        .parse(code, None)
+        .ok_or(anyhow::anyhow!("Failed to parse code"))
+        .unwrap();
+    let captures = parse_capture_for_entity(&lang_config, code, &tree).unwrap();
+    for (i, (index, capture_name)) in capture_names.iter().enumerate() {
+        let capture = captures[*index].0.get(*capture_name).unwrap();
+        let line_range = line_ranges[i].clone();
+        assert_eq!(
+            capture.line_range, line_range,
+            "capture_name: {}",
+            capture_name
+        );
+    }
+}
+
+#[cfg(test)]
 mod tests {
     use super::*;
     use rstest::*;
@@ -314,161 +352,5 @@ impl Test {
         for chunk in &chunks {
             println!("chunk: {:?}", chunk);
         }
-    }
-
-    fn run_test_case(
-        filename: &str,
-        code: &str,
-        capture_names: Vec<(usize, &str)>,
-        line_ranges: Vec<Range<usize>>,
-    ) {
-        let lang_config = Lang::from_filename(filename).unwrap();
-        let mut parser = Parser::new();
-        parser.set_language(&(lang_config.grammar)()).unwrap();
-        let tree = parser
-            .parse(code, None)
-            .ok_or(anyhow::anyhow!("Failed to parse code"))
-            .unwrap();
-        let captures = parse_capture_for_entity(&lang_config, code, &tree).unwrap();
-        println!("captures: {:?}", captures);
-        for (i, (index, capture_name)) in capture_names.iter().enumerate() {
-            let capture = captures[*index].0.get(*capture_name).unwrap();
-            let line_range = line_ranges[i].clone();
-            assert_eq!(
-                capture.line_range, line_range,
-                "capture_name: {}",
-                capture_name
-            );
-        }
-    }
-    #[rstest]
-    #[case(
-        r#"
-fn main() { 
-    println!("Hello, world!");
-}
-"#,
-        vec![(0, "function.definition")],
-        vec![1..3],
-    )]
-    #[case(
-        r#"
-pub struct Test {
-    pub a: i32,
-    pub b: i32,
-}
-"#,
-        vec![(0, "struct.definition")],
-        vec![1..4],
-    )]
-    #[case(
-        r#"
-pub enum Test {
-    A,
-    B,
-}
-"#,
-        vec![(0, "enum.definition")],
-        vec![1..4],
-    )]
-    #[case(
-        r#"
-impl Test {
-    pub fn a(&self) {
-        println!("Hello, world!");
-    }
-}
-"#,
-        vec![(0, "class.definition"), (0, "method.definition")],
-        vec![1..5, 2..4],
-    )]
-    #[case(
-        r#"
-/// this is a test
-impl Test {
-    /// this is a test
-    pub fn a(&self) {
-        println!("Hello, world!");
-    }
-    
-    pub fn b() {
-        println!("Hello, world!");
-    }
-}
-"#,
-        vec![(0, "class.definition"), (0, "method.comment"), (0, "method.definition"), (1, "method.definition")],
-        vec![2..11, 3..4, 4..6, 8..10],
-    )]
-    #[case(
-        r#"
-trait Test {
-    fn a(&self);
-}
-
-trait Test2 {
-    fn b(&self);
-}
-"#,
-        vec![(0, "class.definition"),(0, "method.definition"), (1, "class.definition"), (1, "method.definition")],
-        vec![1..3, 2..2, 5..7, 6..6],
-    )]
-    fn test_rust_query_captures(
-        #[case] code: &str,
-        #[case] capture_names: Vec<(usize, &str)>,
-        #[case] line_ranges: Vec<Range<usize>>,
-    ) {
-        run_test_case("test.rs", code, capture_names, line_ranges);
-    }
-
-    #[rstest]
-    #[case(
-        r#"
-function test() {
-    console.log("Hello, world!");
-}
-"#,
-        vec![(0, "function.definition")],
-        vec![1..3],
-    )]
-    #[case(
-        r#"
-interface Test {
-    a: string;
-    b: number;
-}
-"#,
-        vec![(0, "struct.definition")],
-        vec![1..4],
-    )]
-    #[case(
-        r#"
-// add  array function
-const test = () => {
-    console.log("Hello, world!");   
-}
-
-"#,
-        vec![(0, "function.comment"), (0, "function.definition")],
-        vec![1..1, 2..4],
-    )]
-    #[case(
-        r#"
-class Test {
-    constructor() {
-    }
-    test() {
-        console.log("Hello, world!");
-    }
-}
-"#,
-        vec![(0, "class.definition"), (0, "method.definition"), (1, "method.definition")],
-        vec![1..7, 2..3, 4..6],
-    )]
-    fn test_typescript_query_captures(
-        #[case] code: &str,
-        #[case] capture_names: Vec<(usize, &str)>,
-        #[case] line_ranges: Vec<Range<usize>>,
-    ) {
-        run_test_case("test.ts", code, capture_names, line_ranges);
     }
 }
