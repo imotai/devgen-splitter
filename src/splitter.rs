@@ -15,6 +15,9 @@ mod test_java;
 #[path = "./splitter/test_python.rs"]
 mod test_python;
 #[cfg(test)]
+#[path = "./splitter/test_solidity.rs"]
+mod test_solidity;
+#[cfg(test)]
 #[path = "./splitter/test_ts.rs"]
 mod test_ts;
 

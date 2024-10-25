@@ -10,6 +10,7 @@ const RUST_QUERY: &'static str = include_str!("../../queries/rust.scm");
 const TYPESCRIPT_QUERY: &'static str = include_str!("../../queries/typescript.scm");
 const JAVA_QUERY: &'static str = include_str!("../../queries/java.scm");
 const PYTHON_QUERY: &'static str = include_str!("../../queries/python.scm");
+const SOLIDITY_QUERY: &'static str = include_str!("../../queries/solidity.scm");
 // empty query means this language doesn't support context splitting
 const EMPTY_QUERY: &'static str = "";
 
@@ -80,7 +81,7 @@ static SOLIDITY_LANG_CONFIG: LangConfig = LangConfig {
     lang: &["Solidity"],
     grammar: devgen_tree_sitter_solidity::language,
     file_extensions: &["sol"],
-    query: EMPTY_QUERY,
+    query: SOLIDITY_QUERY,
 };
 
 pub static ALL_LANGS: &[&LangConfig] = &[
