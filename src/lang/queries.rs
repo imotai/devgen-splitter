@@ -84,6 +84,20 @@ static SOLIDITY_LANG_CONFIG: LangConfig = LangConfig {
     query: SOLIDITY_QUERY,
 };
 
+static TOML_LANG_CONFIG: LangConfig = LangConfig {
+    lang: &["TOML"],
+    grammar: devgen_tree_sitter_toml::language,
+    file_extensions: &["toml"],
+    query: EMPTY_QUERY,
+};
+
+static PROTOBUF_LANG_CONFIG: LangConfig = LangConfig {
+    lang: &["Protobuf"],
+    grammar: devgen_tree_sitter_protobuf::language,
+    file_extensions: &["proto"],
+    query: EMPTY_QUERY,
+};
+
 pub static ALL_LANGS: &[&LangConfig] = &[
     &RUST_LANG_CONFIG,
     &TYPESCRIPT_LANG_CONFIG,
@@ -95,4 +109,6 @@ pub static ALL_LANGS: &[&LangConfig] = &[
     &CPP_LANG_CONFIG,
     &GO_LANG_CONFIG,
     &SOLIDITY_LANG_CONFIG,
+    &TOML_LANG_CONFIG,
+    &PROTOBUF_LANG_CONFIG,
 ];

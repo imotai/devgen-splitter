@@ -27,6 +27,8 @@ tree-sitter-md = "0.2.3"
 anyhow = "1.0.89"
 serde = {version="1.0.210", features=["derive"]}
 devgen-tree-sitter-solidity = "0.21.0"
+devgen-tree-sitter-toml = "0.21.0"
+devgen-tree-sitter-protobuf = "0.21.0"
 
 [dev-dependencies]
 rstest = "0.23.0"

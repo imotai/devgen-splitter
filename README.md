@@ -47,7 +47,7 @@ For more examples, go to [examples](./examples)
 | TypeScript | ✅          | ✅       | ✅   |
 | Java       | ✅          | ✅       | ✅   |
 | Python     | ✅          | ✅       | ✅   |
-| Python     | 🚧          | 🚧       | 🚧   |
+| Solidity   | ✅          | ✅       | ✅   |
 | Go         | 🚧          | 🚧       | 🚧   |
 | C++        | 🚧          | 🚧       | 🚧   |
 | C          | 🚧          | 🚧       | 🚧   |
