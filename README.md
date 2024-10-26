@@ -5,7 +5,7 @@ It utilizes tree-sitter to identify code entities (such as classes, functions, a
 [![codecov](https://codecov.io/github/imotai/devgen-splitter/graph/badge.svg?token=3YSFEZ4JLI)](https://codecov.io/github/imotai/devgen-splitter)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/imotai/devgen-splitter/rust.yml)
 
-
+![splitter](./images/splitter.png)
 ## Features
 
 - Language-aware code splitting
