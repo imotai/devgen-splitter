@@ -1,6 +1,6 @@
 [package]
 name = "devgen-splitter"
-version = "0.4.1"
+version = "0.4.5"
 edition = "2021"
 authors = ["imotai <imotai@gmail.com>"]
 description = "Devgen Splitter is a Rust library that breaks down source code into contextual chunks."
@@ -24,9 +24,13 @@ tree-sitter-ruby = "0.21.0"
 tree-sitter-bash = "0.21.0"
 tree-sitter-php = "0.22.4"
 tree-sitter-md = "0.2.3"
+tree-sitter-swift= "0.4.3"
+
 anyhow = "1.0.89"
 serde = {version="1.0.210", features=["derive"]}
 devgen-tree-sitter-solidity = "0.21.0"
+devgen-tree-sitter-toml = "0.21.0"
+devgen-tree-sitter-protobuf = "0.21.0"
 
 [dev-dependencies]
 rstest = "0.23.0"

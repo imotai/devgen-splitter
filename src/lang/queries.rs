@@ -9,6 +9,8 @@ use super::LangConfig;
 const RUST_QUERY: &'static str = include_str!("../../queries/rust.scm");
 const TYPESCRIPT_QUERY: &'static str = include_str!("../../queries/typescript.scm");
 const JAVA_QUERY: &'static str = include_str!("../../queries/java.scm");
+const PYTHON_QUERY: &'static str = include_str!("../../queries/python.scm");
+const SOLIDITY_QUERY: &'static str = include_str!("../../queries/solidity.scm");
 // empty query means this language doesn't support context splitting
 const EMPTY_QUERY: &'static str = "";
 
@@ -44,7 +46,7 @@ static PYTHON_LANG_CONFIG: LangConfig = LangConfig {
     lang: &["Python"],
     grammar: tree_sitter_python::language,
     file_extensions: &["py"],
-    query: EMPTY_QUERY,
+    query: PYTHON_QUERY,
 };
 
 static C_LANG_CONFIG: LangConfig = LangConfig {
@@ -79,6 +81,20 @@ static SOLIDITY_LANG_CONFIG: LangConfig = LangConfig {
     lang: &["Solidity"],
     grammar: devgen_tree_sitter_solidity::language,
     file_extensions: &["sol"],
+    query: SOLIDITY_QUERY,
+};
+
+static TOML_LANG_CONFIG: LangConfig = LangConfig {
+    lang: &["TOML"],
+    grammar: devgen_tree_sitter_toml::language,
+    file_extensions: &["toml"],
+    query: EMPTY_QUERY,
+};
+
+static PROTOBUF_LANG_CONFIG: LangConfig = LangConfig {
+    lang: &["Protobuf"],
+    grammar: devgen_tree_sitter_protobuf::language,
+    file_extensions: &["proto"],
     query: EMPTY_QUERY,
 };
 
@@ -93,4 +109,6 @@ pub static ALL_LANGS: &[&LangConfig] = &[
     &CPP_LANG_CONFIG,
     &GO_LANG_CONFIG,
     &SOLIDITY_LANG_CONFIG,
+    &TOML_LANG_CONFIG,
+    &PROTOBUF_LANG_CONFIG,
 ];

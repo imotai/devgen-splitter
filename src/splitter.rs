@@ -3,9 +3,27 @@
 // Copyright (C) 2024 imotai <codego.me@gmail.com>
 // Distributed under terms of the MIT license.
 //
+
 mod context_splitter;
 pub mod entity_splitter;
 mod line_spliter;
+
+#[cfg(test)]
+#[path = "./splitter/test_java.rs"]
+mod test_java;
+#[cfg(test)]
+#[path = "./splitter/test_python.rs"]
+mod test_python;
+#[cfg(test)]
+#[path = "./splitter/test_rust.rs"]
+mod test_rust;
+#[cfg(test)]
+#[path = "./splitter/test_solidity.rs"]
+mod test_solidity;
+#[cfg(test)]
+#[path = "./splitter/test_ts.rs"]
+mod test_ts;
+
 use crate::{
     lang::{
         Lang,
@@ -31,11 +49,6 @@ use tree_sitter::{
     QueryCursor,
     Tree,
 };
-
-const METHOD_NAME: &str = "method.name";
-const METHOD_DEFINITION: &str = "method.definition";
-const METHOD_COMMENT: &str = "method.comment";
-const CLASS_DEFINITION: &str = "class.definition";
 
 /// Represents a code entity with associated metadata
 #[derive(Debug, Clone, PartialEq)]
@@ -85,28 +98,32 @@ fn parse_capture_for_entity<'a>(
     let mut query_cursor = QueryCursor::new();
     let matches = query_cursor.matches(&query, tree.root_node(), code.as_bytes());
     // only the method, function, struct, enum will be pushed to entity_captures_map
+    // Note: if the method and function has the same location, only the method will be captured
     let mut entity_captures_map: BTreeMap<usize, (HashMap<String, EntityNode>, Vec<Node>)> =
         BTreeMap::new();
-
     for m in matches {
         let mut captures: HashMap<String, EntityNode> = HashMap::new();
-        let mut parent_capture: Option<(String, EntityNode)> = None;
+        let mut parent_captures: HashMap<String, EntityNode> = HashMap::new();
         let mut nodes = vec![];
         let mut definition_start = 0;
         for c in m.captures {
             let capture_name = query.capture_names()[c.index as usize];
-            if capture_name == CLASS_DEFINITION {
-                // enter a new class or interface
-                parent_capture = Some((
+            // handle the parent capture. current the list of parent capture
+            // 1. class.definition
+            // 2. method.class.name
+            // 3. method.interface.name
+            if capture_name.contains("class") || capture_name.contains("interface") {
+                parent_captures.insert(
                     capture_name.to_string(),
                     EntityNode {
                         byte_range: c.node.byte_range(),
                         line_range: c.node.start_position().row..c.node.end_position().row,
                     },
-                ));
+                );
                 continue;
             }
             // handle the multi times for the same capture name
+            // the line comment and block comment will be merged
             if let Some(existing_node) = captures.get_mut(capture_name) {
                 existing_node.byte_range = Range {
                     start: existing_node
@@ -132,31 +149,24 @@ fn parse_capture_for_entity<'a>(
                 );
             }
 
+            // handle the all the definition
             if capture_name.ends_with(".definition") {
                 definition_start = c.node.byte_range().start;
             }
 
-            // when meet method.name, we need to push code chunk for every method.name
-            if capture_name == METHOD_NAME {
-                if let Some(ref parent_capture) = parent_capture {
-                    captures.insert(parent_capture.0.clone(), parent_capture.1.clone());
-                }
+            // handle the name node match
+            if capture_name.ends_with(".name") {
+                // copy the parent capture to the captures
+                parent_captures.iter().for_each(|(k, v)| {
+                    captures.insert(k.clone(), v.clone());
+                });
                 entity_captures_map.insert(definition_start, (captures.clone(), nodes));
-                let new_captures = captures.clone();
+                // reset the captures and nodes
                 captures = HashMap::new();
-                captures.extend(new_captures);
-                captures.remove(METHOD_NAME);
-                captures.remove(METHOD_DEFINITION);
-                captures.remove(METHOD_COMMENT);
                 nodes = vec![];
-                continue;
-            }
-            if !capture_name.ends_with(".name") {
+            } else {
                 nodes.push(c.node);
             }
-        }
-        if nodes.len() > 0 {
-            entity_captures_map.insert(definition_start, (captures, nodes));
         }
     }
     Ok(entity_captures_map
@@ -215,7 +225,10 @@ pub fn split(filename: &str, code: &str, options: &SplitOptions) -> Result<Vec<C
         .filter_map(|(captures, nodes)| {
             match context_splitter::convert_node_to_code_entity(captures, code) {
                 Ok(entity) => Some((entity, nodes.to_vec())),
-                Err(_e) => None,
+                Err(e) => {
+                    println!("error: {:?}", e);
+                    None
+                }
             }
         })
         .collect::<Vec<(CodeEntity, Vec<Node>)>>();
@@ -251,6 +264,32 @@ pub fn split(filename: &str, code: &str, options: &SplitOptions) -> Result<Vec<C
             chunk
         })
         .collect::<Vec<Chunk>>())
+}
+
+#[cfg(test)]
+fn run_test_case(
+    filename: &str,
+    code: &str,
+    capture_names: Vec<(usize, &str)>,
+    line_ranges: Vec<Range<usize>>,
+) {
+    let lang_config = Lang::from_filename(filename).unwrap();
+    let mut parser = Parser::new();
+    parser.set_language(&(lang_config.grammar)()).unwrap();
+    let tree = parser
+        .parse(code, None)
+        .ok_or(anyhow::anyhow!("Failed to parse code"))
+        .unwrap();
+    let captures = parse_capture_for_entity(&lang_config, code, &tree).unwrap();
+    for (i, (index, capture_name)) in capture_names.iter().enumerate() {
+        let capture = captures[*index].0.get(*capture_name).unwrap();
+        let line_range = line_ranges[i].clone();
+        assert_eq!(
+            capture.line_range, line_range,
+            "capture_name: {}",
+            capture_name
+        );
+    }
 }
 
 #[cfg(test)]
@@ -314,161 +353,5 @@ impl Test {
         for chunk in &chunks {
             println!("chunk: {:?}", chunk);
         }
-    }
-
-    fn run_test_case(
-        filename: &str,
-        code: &str,
-        capture_names: Vec<(usize, &str)>,
-        line_ranges: Vec<Range<usize>>,
-    ) {
-        let lang_config = Lang::from_filename(filename).unwrap();
-        let mut parser = Parser::new();
-        parser.set_language(&(lang_config.grammar)()).unwrap();
-        let tree = parser
-            .parse(code, None)
-            .ok_or(anyhow::anyhow!("Failed to parse code"))
-            .unwrap();
-        let captures = parse_capture_for_entity(&lang_config, code, &tree).unwrap();
-        println!("captures: {:?}", captures);
-        for (i, (index, capture_name)) in capture_names.iter().enumerate() {
-            let capture = captures[*index].0.get(*capture_name).unwrap();
-            let line_range = line_ranges[i].clone();
-            assert_eq!(
-                capture.line_range, line_range,
-                "capture_name: {}",
-                capture_name
-            );
-        }
-    }
-    #[rstest]
-    #[case(
-        r#"
-fn main() { 
-    println!("Hello, world!");
-}
-"#,
-        vec![(0, "function.definition")],
-        vec![1..3],
-    )]
-    #[case(
-        r#"
-pub struct Test {
-    pub a: i32,
-    pub b: i32,
-}
-"#,
-        vec![(0, "struct.definition")],
-        vec![1..4],
-    )]
-    #[case(
-        r#"
-pub enum Test {
-    A,
-    B,
-}
-"#,
-        vec![(0, "enum.definition")],
-        vec![1..4],
-    )]
-    #[case(
-        r#"
-impl Test {
-    pub fn a(&self) {
-        println!("Hello, world!");
-    }
-}
-"#,
-        vec![(0, "class.definition"), (0, "method.definition")],
-        vec![1..5, 2..4],
-    )]
-    #[case(
-        r#"
-/// this is a test
-impl Test {
-    /// this is a test
-    pub fn a(&self) {
-        println!("Hello, world!");
-    }
-    
-    pub fn b() {
-        println!("Hello, world!");
-    }
-}
-"#,
-        vec![(0, "class.definition"), (0, "method.comment"), (0, "method.definition"), (1, "method.definition")],
-        vec![2..11, 3..4, 4..6, 8..10],
-    )]
-    #[case(
-        r#"
-trait Test {
-    fn a(&self);
-}
-
-trait Test2 {
-    fn b(&self);
-}
-"#,
-        vec![(0, "class.definition"),(0, "method.definition"), (1, "class.definition"), (1, "method.definition")],
-        vec![1..3, 2..2, 5..7, 6..6],
-    )]
-    fn test_rust_query_captures(
-        #[case] code: &str,
-        #[case] capture_names: Vec<(usize, &str)>,
-        #[case] line_ranges: Vec<Range<usize>>,
-    ) {
-        run_test_case("test.rs", code, capture_names, line_ranges);
-    }
-
-    #[rstest]
-    #[case(
-        r#"
-function test() {
-    console.log("Hello, world!");
-}
-"#,
-        vec![(0, "function.definition")],
-        vec![1..3],
-    )]
-    #[case(
-        r#"
-interface Test {
-    a: string;
-    b: number;
-}
-"#,
-        vec![(0, "struct.definition")],
-        vec![1..4],
-    )]
-    #[case(
-        r#"
-// add  array function
-const test = () => {
-    console.log("Hello, world!");   
-}
-
-"#,
-        vec![(0, "function.comment"), (0, "function.definition")],
-        vec![1..1, 2..4],
-    )]
-    #[case(
-        r#"
-class Test {
-    constructor() {
-    }
-    test() {
-        console.log("Hello, world!");
-    }
-}
-"#,
-        vec![(0, "class.definition"), (0, "method.definition"), (1, "method.definition")],
-        vec![1..7, 2..3, 4..6],
-    )]
-    fn test_typescript_query_captures(
-        #[case] code: &str,
-        #[case] capture_names: Vec<(usize, &str)>,
-        #[case] line_ranges: Vec<Range<usize>>,
-    ) {
-        run_test_case("test.ts", code, capture_names, line_ranges);
     }
 }
