@@ -1,7 +1,5 @@
 ; Interface query
 (
-  (comment)* @interface.comment
-  .
   (interface_declaration
     name: (identifier) @method.class.name
     body: (contract_body
@@ -18,18 +16,18 @@
 
 ; Contract query
 (
-  (comment)* @contract.comment
-  .
   (contract_declaration
     name: (identifier) @method.class.name
     body: (contract_body
+      (_)*
       (
         (comment)* @method.comment
         .
         (function_definition
           name: (identifier) @method.name
         ) @method.definition
-      )*
+      )
+      *
     )
   ) @class.definition
 )

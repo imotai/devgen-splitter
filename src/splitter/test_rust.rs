@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
-    use rstest::*;
     use crate::splitter::run_test_case;
+    use rstest::*;
     use std::ops::Range;
     #[rstest]
     #[case(

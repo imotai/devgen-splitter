@@ -20,10 +20,6 @@
 
 ; Trait query
 (
-  (line_comment)* @interface.comment
-  .
-  (attribute_item)? @interface.derive
-  .
   (trait_item
     name: (type_identifier) @method.class.name
     body: (declaration_list
