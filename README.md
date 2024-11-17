@@ -5,17 +5,18 @@ It utilizes tree-sitter to identify code entities (such as classes, functions, a
 [![codecov](https://codecov.io/github/imotai/devgen-splitter/graph/badge.svg?token=3YSFEZ4JLI)](https://codecov.io/github/imotai/devgen-splitter)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/imotai/devgen-splitter/rust.yml)
 
+
 ![splitter](./images/splitter.png)
+
 ## Features
 
 - Language-aware code splitting
 - Generate chunks with contextual metadata
 - Support for multiple programming languages
 
-
 why devgen-splitter?
 
-for a better cite feature
+If you are building a code search agent, you may want to the LLM to generate the link for related class, struct, enum, etc. Devgen Splitter can help you generate the chunks with contextual metadata.
 
 ## Usage
 

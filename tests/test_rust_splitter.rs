@@ -35,6 +35,18 @@ use rstest::rstest;
     SplitOptions { chunk_line_limit: 30 },
     18
 )]
+#[case(
+    "rust_method_for_incomplete_block.rs",
+    include_str!("./cases/rust/rust_method_for_incomplete_block.rs"),
+    SplitOptions { chunk_line_limit: 30 },
+    6
+)]
+#[case(
+    "large_field.rs",
+    include_str!("./cases/rust/large_field.rs"),
+    SplitOptions { chunk_line_limit: 30 },
+    74
+)]
 fn test_rust_split(
     #[case] filename: &str,
     #[case] code: &str,
