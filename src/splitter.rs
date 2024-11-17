@@ -220,15 +220,20 @@ pub fn split(filename: &str, code: &str, options: &SplitOptions) -> Result<Vec<C
         );
     }
     let captures = parse_capture_for_entity(&lang_config, code, &tree)?;
+    if captures.is_empty() {
+        return line_spliter::split_tree_node(
+            &lines,
+            &tree.root_node(),
+            options.chunk_line_limit,
+            options.chunk_line_limit / 2,
+        );
+    }
     let entities = captures
         .iter()
         .filter_map(|(captures, nodes)| {
             match context_splitter::convert_node_to_code_entity(captures, code) {
                 Ok(entity) => Some((entity, nodes.to_vec())),
-                Err(e) => {
-                    println!("error: {:?}", e);
-                    None
-                }
+                Err(e) => None,
             }
         })
         .collect::<Vec<(CodeEntity, Vec<Node>)>>();
@@ -281,6 +286,7 @@ fn run_test_case(
         .ok_or(anyhow::anyhow!("Failed to parse code"))
         .unwrap();
     let captures = parse_capture_for_entity(&lang_config, code, &tree).unwrap();
+    println!("captures: {:?}", captures);
     for (i, (index, capture_name)) in capture_names.iter().enumerate() {
         let capture = captures[*index].0.get(*capture_name).unwrap();
         let line_range = line_ranges[i].clone();
