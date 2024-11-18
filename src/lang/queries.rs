@@ -140,6 +140,12 @@ static C_SHARP_LANG_CONFIG: LangConfig = LangConfig {
     query: EMPTY_QUERY,
 };
 
+static RUBY_LANG_CONFIG: LangConfig = LangConfig {
+    lang: &["Ruby"],
+    grammar: tree_sitter_ruby::language,
+    file_extensions: &["rb"],
+    query: EMPTY_QUERY,
+};
 pub static ALL_LANGS: &[&LangConfig] = &[
     &RUST_LANG_CONFIG,
     &TYPESCRIPT_LANG_CONFIG,
@@ -159,4 +165,5 @@ pub static ALL_LANGS: &[&LangConfig] = &[
     &PHP_LANG_CONFIG,
     &BASH_LANG_CONFIG,
     &C_SHARP_LANG_CONFIG,
+    &RUBY_LANG_CONFIG,
 ];
