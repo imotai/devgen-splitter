@@ -101,7 +101,7 @@ static PROTOBUF_LANG_CONFIG: LangConfig = LangConfig {
 static R_LANG_CONFIG: LangConfig = LangConfig {
     lang: &["R"],
     grammar: devgen_tree_sitter_r::language,
-    file_extensions: &["r"],
+    file_extensions: &["r", "R"],
     query: EMPTY_QUERY,
 };
 
