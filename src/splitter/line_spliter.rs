@@ -26,7 +26,6 @@ pub fn split_tree_node(
             end: lines.len(),
         });
     }
-
     Ok(chunks
         .iter()
         .map(|chunk| {
