@@ -98,6 +98,54 @@ static PROTOBUF_LANG_CONFIG: LangConfig = LangConfig {
     query: EMPTY_QUERY,
 };
 
+static R_LANG_CONFIG: LangConfig = LangConfig {
+    lang: &["R"],
+    grammar: devgen_tree_sitter_r::language,
+    file_extensions: &["r", "R"],
+    query: EMPTY_QUERY,
+};
+
+static SWIFT_LANG_CONFIG: LangConfig = LangConfig {
+    lang: &["Swift"],
+    grammar: devgen_tree_sitter_swift::language,
+    file_extensions: &["swift"],
+    query: EMPTY_QUERY,
+};
+
+static PHP_LANG_CONFIG: LangConfig = LangConfig {
+    lang: &["PHP"],
+    grammar: devgen_tree_sitter_php::language_php,
+    file_extensions: &["php"],
+    query: EMPTY_QUERY,
+};
+
+static SQL_LANG_CONFIG: LangConfig = LangConfig {
+    lang: &["SQL"],
+    grammar: devgen_tree_sitter_sql::language,
+    file_extensions: &["sql"],
+    query: EMPTY_QUERY,
+};
+
+static BASH_LANG_CONFIG: LangConfig = LangConfig {
+    lang: &["Bash"],
+    grammar: tree_sitter_bash::language,
+    file_extensions: &["sh"],
+    query: EMPTY_QUERY,
+};
+
+static C_SHARP_LANG_CONFIG: LangConfig = LangConfig {
+    lang: &["C#"],
+    grammar: tree_sitter_c_sharp::language,
+    file_extensions: &["cs"],
+    query: EMPTY_QUERY,
+};
+
+static RUBY_LANG_CONFIG: LangConfig = LangConfig {
+    lang: &["Ruby"],
+    grammar: tree_sitter_ruby::language,
+    file_extensions: &["rb"],
+    query: EMPTY_QUERY,
+};
 pub static ALL_LANGS: &[&LangConfig] = &[
     &RUST_LANG_CONFIG,
     &TYPESCRIPT_LANG_CONFIG,
@@ -111,4 +159,11 @@ pub static ALL_LANGS: &[&LangConfig] = &[
     &SOLIDITY_LANG_CONFIG,
     &TOML_LANG_CONFIG,
     &PROTOBUF_LANG_CONFIG,
+    &R_LANG_CONFIG,
+    &SWIFT_LANG_CONFIG,
+    &SQL_LANG_CONFIG,
+    &PHP_LANG_CONFIG,
+    &BASH_LANG_CONFIG,
+    &C_SHARP_LANG_CONFIG,
+    &RUBY_LANG_CONFIG,
 ];

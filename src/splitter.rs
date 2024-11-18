@@ -233,7 +233,7 @@ pub fn split(filename: &str, code: &str, options: &SplitOptions) -> Result<Vec<C
         .filter_map(|(captures, nodes)| {
             match context_splitter::convert_node_to_code_entity(captures, code) {
                 Ok(entity) => Some((entity, nodes.to_vec())),
-                Err(e) => None,
+                Err(_e) => None,
             }
         })
         .collect::<Vec<(CodeEntity, Vec<Node>)>>();
