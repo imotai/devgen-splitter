@@ -6,12 +6,13 @@ use rstest::rstest;
 
 #[rstest]
 #[case(
-    "test_script.sh",
-    include_str!("./cases/bash/test_script.sh"),
+    "test.php",
+    include_str!("./cases/php/example_script.php"),
     SplitOptions { chunk_line_limit: 10},
-    2
+    3
+
 )]
-fn test_bash_split(
+fn test_php_split(
     #[case] filename: &str,
     #[case] code: &str,
     #[case] options: SplitOptions,
