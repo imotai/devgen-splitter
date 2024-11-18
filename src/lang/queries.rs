@@ -126,6 +126,20 @@ static SQL_LANG_CONFIG: LangConfig = LangConfig {
     query: EMPTY_QUERY,
 };
 
+static BASH_LANG_CONFIG: LangConfig = LangConfig {
+    lang: &["Bash"],
+    grammar: tree_sitter_bash::language,
+    file_extensions: &["sh"],
+    query: EMPTY_QUERY,
+};
+
+static C_SHARP_LANG_CONFIG: LangConfig = LangConfig {
+    lang: &["C#"],
+    grammar: tree_sitter_c_sharp::language,
+    file_extensions: &["cs"],
+    query: EMPTY_QUERY,
+};
+
 pub static ALL_LANGS: &[&LangConfig] = &[
     &RUST_LANG_CONFIG,
     &TYPESCRIPT_LANG_CONFIG,
@@ -143,4 +157,6 @@ pub static ALL_LANGS: &[&LangConfig] = &[
     &SWIFT_LANG_CONFIG,
     &SQL_LANG_CONFIG,
     &PHP_LANG_CONFIG,
+    &BASH_LANG_CONFIG,
+    &C_SHARP_LANG_CONFIG,
 ];
