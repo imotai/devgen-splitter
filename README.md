@@ -1,4 +1,4 @@
-Devgen Splitter is a Rust library that breaks down source code into contextual chunks. 
+Owl Splitter is a Rust library that breaks down source code into contextual chunks. 
 It utilizes tree-sitter to identify code entities (such as classes, functions, and methods) and generate chunks with contextual metadata.
 
 [![Crates.io Version](https://img.shields.io/crates/v/devgen-splitter)](https://crates.io/crates/devgen-splitter)
